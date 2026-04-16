@@ -1,0 +1,122 @@
+Adicione a funcionalidade de exportação CSV no painel admin. NÃO altere nenhuma outra tela. Siga as instruções abaixo com precisão.
+
+========================================
+1. ONDE ADICIONAR O BOTÃO
+========================================
+Adicionar botão "Baixar CSV" em dois lugares:
+
+LOCAL 1 — /admin/eventos/[id] aba "Participantes":
+- Botão no canto superior direito da aba, ao lado dos filtros
+- Estilo: outline #314C5D, ícone de download à esquerda
+- Label: "Baixar CSV"
+
+LOCAL 2 — /admin/eventos/[id] aba "Participantes" (após encerrar evento):
+- Mesmo botão, mas com label "Baixar relatório de presença CSV"
+- Aparece sempre — não precisa verificar status do evento no protótipo
+
+========================================
+2. ESTRUTURA DO CSV GERADO
+========================================
+O arquivo deve seguir EXATAMENTE esta ordem de colunas:
+
+Coluna 1: Data/hora inscrição (formato: DD/MM/AAAA HH:mm:ss)
+Coluna 2: Nome completo
+Coluna 3: E-mail
+Coluna 4: Tipo de ingresso
+Coluna 5: Hora check-in (vazia se não compareceu — não colocar zero nem traço)
+Coluna 6: Qual é a sua área de atuação? (resposta da triagem 1)
+Coluna 7: Como ficou sabendo do evento? (resposta da triagem 2)
+Coluna 8: Compareceu (última coluna — "Sim" se fez check-in, "Não" se não fez)
+
+Dados mockados para preencher o CSV (baseado no mock-data.ts):
+- Ana Costa | ana@email.com | Geral | 09:12:00 | Tecnologia | LinkedIn | Sim
+- Bruno Lima | bruno@email.com | Geral | 09:18:00 | Finanças | Indicação | Sim
+- Carla Souza | carla@email.com | Geral | 09:31:00 | Tecnologia | Instagram | Sim
+- Diego Alves | diego@email.com | Geral | (vazio) | Finanças | LinkedIn | Não
+- Elena Rocha | elena@email.com | Geral | (vazio) | Marketing | E-mail | Não
+- Felipe Dias | felipe@email.com | Geral | (vazio) | Tecnologia | LinkedIn | Não
+- Gabriela Nunes | gabriela@email.com | Geral | (vazio) | Outro | Instagram | Não
+- Henrique Mota | henrique@email.com | Geral | (vazio) | Finanças | Indicação | Não
+
+========================================
+3. REGRAS TÉCNICAS DO ARQUIVO
+========================================
+- Encoding: UTF-8 com BOM (\uFEFF no início do arquivo)
+  → Sem o BOM, Excel do Windows quebra acentos em nomes como "Gabriela"
+- Separador: vírgula (,)
+- Campos com vírgula ou acento: envolver em aspas duplas
+- Nome do arquivo: imersao-quantdev-xp_[data-de-hoje].csv
+- A função de geração deve usar Blob com type 'text/csv;charset=utf-8'
+
+========================================
+4. IMPLEMENTAÇÃO — FUNÇÃO DE EXPORT
+========================================
+Criar função generateCSV() em /lib/export.ts:
+
+export function generateCSV(participantes: Participante[]): void {
+  const BOM = '\uFEFF';
+  
+  const headers = [
+    'Data/hora inscrição',
+    'Nome completo',
+    'E-mail',
+    'Tipo de ingresso',
+    'Hora check-in',
+    'Qual é a sua área de atuação?',
+    'Como ficou sabendo do evento?',
+    'Compareceu'
+  ];
+
+  const rows = participantes.map(p => [
+    p.inscrito_em,
+    p.nome,
+    p.email,
+    p.tipo_ingresso,
+    p.checkin_em || '',
+    p.triagem?.area || '',
+    p.triagem?.como_soube || '',
+    p.checkin_em ? 'Sim' : 'Não'
+  ]);
+
+  const csvContent = BOM + [headers, ...rows]
+    .map(row => row.map(cell =>
+      cell.includes(',') || cell.includes('"')
+        ? `"${cell.replace(/"/g, '""')}"` : cell
+    ).join(','))
+    .join('\n');
+
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `imersao-quantdev-xp_${new Date().toISOString().split('T')[0]}.csv`;
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
+========================================
+5. FILTROS APLICADOS NO EXPORT
+========================================
+Se o admin tiver filtros ativos na lista (ex: só "presentes" ou só "Geral"),
+o CSV deve exportar apenas os participantes filtrados — não todos.
+
+Adicionar texto informativo abaixo do botão:
+"Exportando X participantes" (onde X = número de registros filtrados atualmente)
+
+========================================
+6. FEEDBACK VISUAL
+========================================
+- Ao clicar: botão muda para "Gerando..." com spinner por 1 segundo (simula processamento)
+- Após download iniciar: botão volta ao normal
+- Toast discreto no canto inferior direito: "CSV baixado com sucesso" (fundo #314C5D, texto branco, some após 3s)
+
+========================================
+TESTE PARA VALIDAR
+========================================
+Após implementar:
+1. Clicar em "Baixar CSV" na aba Participantes
+2. Abrir o arquivo no Excel
+3. Confirmar que os acentos aparecem corretamente (Gabriela, área, inscrição)
+4. Confirmar que Ana, Bruno e Carla têm "Sim" na coluna Compareceu
+5. Confirmar que Diego e os demais têm "Não" e hora check-in vazia
+6. Confirmar que a última coluna é "Compareceu" — não pode estar no meio

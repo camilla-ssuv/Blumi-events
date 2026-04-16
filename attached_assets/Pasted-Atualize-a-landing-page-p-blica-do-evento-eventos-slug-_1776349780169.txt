@@ -1,0 +1,96 @@
+Atualize a landing page pública do evento (/eventos/[slug]) para suportar o modelo de feira com subeventos. NÃO altere nenhuma outra tela. Siga as instruções abaixo com precisão.
+
+========================================
+1. LANDING PAGE DA FEIRA
+========================================
+Se evento.tipo === 'feira', a landing page deve mostrar uma seção "Atividades e Stands" após a descrição do evento.
+
+Esta seção contém:
+- Título "O que acontece na feira" em Plus Jakarta Sans bold
+- Filtros horizontais por tipo: Todos | Stands | Palestras | Workshops
+  (botões pill com fundo #314C5D ativo e outline inativo)
+- Grid de cards de subeventos (2 colunas no desktop, 1 no mobile)
+
+CARD DE SUBEVENTO:
+- Borda superior colorida com a cor_primaria do subevento (ou #314C5D como fallback)
+- Logo da empresa (placeholder colorido com iniciais se não houver logo)
+- Nome do subevento em Plus Jakarta Sans bold
+- Tipo em badge (stand/palestra/workshop)
+- Horário (data_inicio formatada como "15/05 às 14h")
+- Vagas restantes se capacidade definida ("12 vagas restantes" em laranja se < 20%)
+- Descrição curta (máx 2 linhas com truncamento)
+
+BOTÃO DE AÇÃO por modo:
+- Modo A "Pré-inscrição": botão "Quero participar" em #DEFF66 com texto #314C5D bold → abre modal de inscrição no subevento
+- Modo B "Check-in livre": botão outline cinza "Entrada livre — apresente seu QR" → não abre modal, só exibe tooltip "Basta ter inscrição no evento principal"
+- Se esgotado: botão desabilitado "Vagas esgotadas" em cinza
+
+========================================
+2. MODAL DE INSCRIÇÃO NO SUBEVENTO (Modo A)
+========================================
+Ao clicar em "Quero participar" num subevento Modo A:
+
+Modal com 2 etapas:
+
+ETAPA 1 — Seus dados:
+- Nome completo*
+- E-mail*
+- Senha (criar conta — se já logado, pular)
+- Indicador de vagas restantes no topo do modal
+
+ETAPA 2 — Perguntas do subevento (se houver):
+- Mostrar perguntas mockadas do subevento
+- Se não houver perguntas: pular direto para confirmação
+
+TELA DE SUCESSO:
+- Card com fundo #314C5D
+- Ícone de check em #DEFF66
+- "Inscrição confirmada no [nome do subevento]!"
+- "Você também foi inscrito automaticamente no evento principal."
+- "Seu QR code foi enviado para o seu e-mail."
+- Botão "Ver minha área" que leva para /minha-area
+
+========================================
+3. PÁGINA INDIVIDUAL DO SUBEVENTO
+========================================
+Criar rota /eventos/[slug-evento]/[slug-subevento] com:
+
+- Header com cor_primaria do subevento como fundo
+- Logo da empresa no header
+- Nome do subevento em Plus Jakarta Sans bold grande
+- Tipo, data/hora, local (herdado do evento pai)
+- Descrição completa
+- Vagas restantes (barra de progresso visual)
+
+Se Modo A:
+- Botão grande "Quero participar" em #DEFF66 → mesmo modal de inscrição da landing page
+- Contador de vagas atualizado
+
+Se Modo B:
+- Box informativo com fundo #314C5D, texto branco:
+  "Este stand é de entrada livre durante a feira. Basta apresentar seu QR code do evento principal na entrada."
+- Sem formulário de inscrição
+
+- Link "← Voltar para a feira" no topo
+
+========================================
+4. ATUALIZAR ÁREA DO PARTICIPANTE
+========================================
+Em /minha-area, na aba "Meus eventos":
+
+Após o card do evento pai, mostrar os subeventos nos quais o participante está inscrito:
+
+- Seção "Suas atividades na feira" com cards menores
+- Cada card: nome do subevento, horário, QR code próprio do subevento (QR visual diferente do evento pai)
+- Badge de status: "Inscrito" (verde) ou "Presente" (azul) se check-in feito
+
+Na aba "Eventos passados":
+- Subeventos com presença: botão "Baixar certificado" individual por subevento
+- Subeventos sem presença: label "Não compareceu" em cinza
+
+========================================
+REGRAS VISUAIS
+========================================
+- Cores: #314C5D principal, #DEFF66 CTA, #FF6982 alertas, #FF8C69 warnings, #FBF7EB fundo
+- Tipografia: Plus Jakarta Sans títulos, Inter corpo
+- NÃO alterar nenhuma outra tela além das mencionadas

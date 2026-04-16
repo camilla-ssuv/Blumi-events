@@ -9,6 +9,7 @@ import NewEvent from "@/pages/admin/new-event";
 import EventDetail from "@/pages/admin/event-detail";
 import CheckinPage from "@/pages/admin/checkin";
 import EventPublic from "@/pages/event-public";
+import SubeventPublic from "@/pages/subevent-public";
 import ParticipantArea from "@/pages/participant-area";
 import NotFound from "@/pages/not-found";
 
@@ -21,6 +22,7 @@ function Router() {
       <Route path="/admin/eventos/novo" component={NewEvent} />
       <Route path="/admin/eventos/:id" component={EventDetail} />
       <Route path="/admin/checkin/:id" component={CheckinPage} />
+      <Route path="/eventos/:eventSlug/:subSlug" component={SubeventPublic} />
       <Route path="/eventos/:slug" component={EventPublic} />
       <Route path="/minha-area" component={ParticipantArea} />
       <Route component={NotFound} />

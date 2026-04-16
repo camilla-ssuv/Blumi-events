@@ -34,6 +34,9 @@ Frontend-only event management platform prototype at `/`. Built with React + Vit
 - **Admin**: Sidebar navigation, event creation form, event dashboard with metrics, participant table, screening questions CRUD, check-in terminal
 - **Subeventos**: Events with `tipo: 'feira'` show a "Subeventos" tab with CRUD modal, type filters, detail drawer with metrics/participant list/encerrar action. Supports two check-in modes: `inscricao` (pre-registration required) and `checkin_livre` (any event participant)
 - **Check-in with subeventos**: Dropdown selector in check-in terminal to switch between event-level and sub-event check-in. Different validation logic per mode and distinct feedback messages
+- **Public feira page**: Landing page shows "O que acontece na feira" section with sub-event cards (2-col grid), type filters, colored top borders, "Quero participar" for pre-registration subs, "Entrada livre" for check-in livre stands, low-vagas warnings
+- **Sub-event detail page**: `/eventos/[slug]/[sub-slug]` individual page with colored header, progress bar, registration modal or info box depending on mode
+- **Participant area with subs**: "Suas atividades na feira" section with per-sub-event QR codes and status badges, past events with individual sub-event certificate download
 - **Participant**: Public event page with registration modal (2-step), participant area with QR codes, past events with certificate download
 - **Check-in**: Dark-mode terminal with USB scanner support, Web Audio API beep, manual search, real-time counter
 

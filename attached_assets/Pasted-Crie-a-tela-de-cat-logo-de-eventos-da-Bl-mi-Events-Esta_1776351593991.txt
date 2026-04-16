@@ -1,0 +1,179 @@
+Crie a tela de catálogo de eventos da Blūmi Events. Esta é a tela de DESCOBERTA — onde o participante vê todos os eventos disponíveis e escolhe em qual quer se inscrever. É diferente de /minha-area (que mostra só eventos já inscritos). NÃO altere nenhuma tela existente.
+
+========================================
+1. NOVA ROTA: /eventos
+========================================
+Criar a página /eventos (ou /app/eventos/page.tsx no App Router).
+
+Esta tela é acessível sem login (pública), mas se o participante estiver logado, o botão de inscrição vai direto ao fluxo sem pedir dados novamente.
+
+========================================
+2. HEADER DA PÁGINA
+========================================
+- Navbar da Blūmi com fundo #314C5D
+- Logo "blūmi events" em branco à esquerda
+- Botão "Entrar" à direita se não logado | Avatar com iniciais se logado
+- Link "Meus eventos" para /minha-area (só se logado)
+
+========================================
+3. HERO SECTION
+========================================
+- Fundo #314C5D
+- Título grande em Plus Jakarta Sans bold branco: "Encontre seu próximo evento"
+- Subtítulo em branco com opacidade 80%: "Feiras de carreira, palestras e workshops das melhores empresas do Brasil"
+- Barra de busca grande centralizada: input com placeholder "Buscar por evento, empresa ou cidade..." com ícone de lupa
+- Fundo do input: branco, cantos arredondados 12px
+
+========================================
+4. BARRA DE FILTROS
+========================================
+Abaixo do hero, fundo #FBF7EB, linha horizontal com:
+
+FILTRO 1 — Tipo:
+Botões pill: Todos | Feira | Palestra | Workshop
+Ativo: fundo #314C5D, texto branco
+Inativo: outline #314C5D, texto #314C5D
+
+FILTRO 2 — Data:
+Select dropdown: Todos | Esta semana | Este mês | Próximos 3 meses
+
+FILTRO 3 — Cidade:
+Select dropdown: Todas | São Paulo | Rio de Janeiro | Belo Horizonte | Remoto
+
+FILTRO 4 — Empresa:
+Select dropdown: Todas | XP Inc. | BTG Pactual | (lista das empresas mockadas)
+
+Contador de resultados à direita: "4 eventos encontrados"
+
+========================================
+5. GRID DE CARDS DE EVENTOS
+========================================
+Layout: grid 3 colunas no desktop, 2 no tablet, 1 no mobile.
+Padding lateral: 24px. Gap entre cards: 20px.
+
+CARD DE EVENTO:
+Estrutura do card (cantos 16px, borda 1px #E0E0E0, fundo branco, hover: sobe 4px com transição suave):
+
+[TOPO DO CARD — capa colorida 180px altura]
+- Se evento aberto: sem badge
+- Se evento por convite: badge "Por convite" no canto superior direito (fundo #314C5D, texto #DEFF66, 10px bold)
+- Cor de fundo da capa: usar cor_primaria do tenant ou gradiente entre #314C5D e #29D4FF como fallback
+- Logo da empresa centralizada sobre a capa (círculo branco 48px com iniciais ou logo)
+
+[CORPO DO CARD — padding 16px]
+- Badge de tipo: "FEIRA" | "PALESTRA" | "WORKSHOP" (10px uppercase, cor baseada no tipo: feira=#314C5D, palestra=#DEFF66 texto #314C5D, workshop=#FF8C69)
+- Nome do evento em Plus Jakarta Sans bold 15px, máx 2 linhas com reticências
+- Empresa organizadora em Inter 12px cinza
+- Linha com ícone 📅 + data formatada ("15 mai 2025")
+- Linha com ícone 📍 + cidade ou "Online"
+- Se tem subeventos: linha com ícone 🎪 + "N atividades" (ex: "4 atividades")
+
+[RODAPÉ DO CARD — border-top, padding 12px 16px]
+- Vagas restantes à esquerda: "423 vagas" em verde se > 50%, laranja se < 20%, vermelho "Últimas vagas!" se < 10%
+- Botão à direita:
+  * Evento aberto + não inscrito: "Inscrever-se" fundo #DEFF66, texto #314C5D bold
+  * Evento por convite + não inscrito: "Ver evento" outline #314C5D
+  * Já inscrito: "Inscrito ✓" fundo #E8F5E9, texto #085041, não clicável
+
+========================================
+6. MOCK DATA — ADICIONAR AO mock-data.ts
+========================================
+Adicionar campo visibilidade ao tipo Evento: 'aberto' | 'convite'
+
+Atualizar o evento existente "Imersão em QuantDev na XP Inc." com:
+  visibilidade: 'aberto'
+
+Adicionar 3 eventos novos mockados:
+
+EVENTO 2:
+  id: 'evt-002'
+  nome: 'Feira de Carreiras BTG Pactual 2025'
+  tipo: 'feira'
+  empresa: 'BTG Pactual'
+  logo_inicial: 'BT'
+  cor_primaria: '#314C5D'
+  data_inicio: '2025-06-10T09:00:00'
+  local_nome: 'BTG Pactual — Torre B'
+  cidade: 'São Paulo'
+  capacidade_total: 1500
+  vagas_restantes: 1243
+  visibilidade: 'aberto'
+  status: 'publicado'
+  subeventos_count: 6
+  descricao: 'A maior feira de carreiras do BTG Pactual. Conecte-se com nosso time de tecnologia, finanças e operações.'
+
+EVENTO 3:
+  id: 'evt-003'
+  nome: 'Workshop de Python para Finanças — XP Inc.'
+  tipo: 'workshop'
+  empresa: 'XP Inc.'
+  logo_inicial: 'XP'
+  cor_primaria: '#FF6982'
+  data_inicio: '2025-05-28T14:00:00'
+  local_nome: 'Online — Zoom'
+  cidade: 'Remoto'
+  capacidade_total: 100
+  vagas_restantes: 12
+  visibilidade: 'convite'
+  status: 'publicado'
+  subeventos_count: 0
+  descricao: 'Workshop intensivo de Python aplicado a finanças quantitativas. Vagas muito limitadas.'
+
+EVENTO 4:
+  id: 'evt-004'
+  nome: 'Palestra: O Futuro do Mercado Financeiro Brasileiro'
+  tipo: 'palestra'
+  empresa: 'Blūmi Talents'
+  logo_inicial: 'BL'
+  cor_primaria: '#DEFF66'
+  data_inicio: '2025-07-03T19:00:00'
+  local_nome: 'Auditório Faria Lima'
+  cidade: 'São Paulo'
+  capacidade_total: 300
+  vagas_restantes: 287
+  visibilidade: 'aberto'
+  status: 'publicado'
+  subeventos_count: 0
+  descricao: 'Uma noite de debates sobre tendências, regulação e oportunidades no mercado financeiro brasileiro.'
+
+========================================
+7. ESTADO VAZIO E LOADING
+========================================
+- Loading: grid com 6 skeleton cards (retângulos cinza animados com pulse)
+- Sem resultados: ilustração simples (círculo #314C5D com ícone 📅 branco) + texto "Nenhum evento encontrado" + botão "Limpar filtros"
+
+========================================
+8. LÓGICA DE FILTROS (useState)
+========================================
+- Todos os filtros funcionam em tempo real (sem botão "Aplicar")
+- Filtros são combinados com AND (data E tipo E cidade)
+- Busca textual filtra por nome do evento, empresa e cidade
+- Estado dos filtros fica na URL como query params: /eventos?tipo=feira&cidade=sao-paulo
+- Ao limpar um filtro, URL atualiza automaticamente
+
+========================================
+9. EVENTO POR CONVITE — COMPORTAMENTO
+========================================
+- Card exibe badge "Por convite" mas aparece no catálogo normalmente
+- Botão "Ver evento" leva para a landing page do evento (/eventos/[slug])
+- Na landing page do evento por convite: formulário de inscrição pede um "código de convite" antes de prosseguir
+- Código de convite mockado: "BLUEMI2025" (aceitar qualquer input por enquanto)
+- Se código inválido: mensagem de erro em #FF6982
+
+========================================
+10. NAVEGAÇÃO ENTRE TELAS
+========================================
+Garantir que a navegação esteja conectada:
+- /eventos → catálogo (nova tela)
+- /eventos/[slug] → landing page do evento (já existe)
+- /minha-area → área do participante com eventos inscritos (já existe)
+- Header em /eventos deve ter link "Meus eventos" que vai para /minha-area
+- Após inscrição bem-sucedida em /eventos/[slug]: botão "Ver meus eventos" que vai para /minha-area
+
+========================================
+REGRAS VISUAIS
+========================================
+- Cores: #314C5D principal, #DEFF66 CTA, #FF6982 alertas, #FF8C69 warnings, #FBF7EB fundo
+- Tipografia: Plus Jakarta Sans títulos, Inter corpo
+- Cards: cantos 16px, hover sobe 4px com transition: transform 0.2s ease
+- NÃO alterar nenhuma tela além das mencionadas acima

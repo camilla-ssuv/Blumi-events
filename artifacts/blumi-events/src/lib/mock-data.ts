@@ -42,8 +42,29 @@ export interface EventData {
   type: TicketType;
   tipo: 'simples' | 'feira';
   status: 'rascunho' | 'publicado' | 'encerrado';
+  visibilidade: 'aberto' | 'convite';
   questions: ScreeningQuestion[];
   subeventos?: Subevento[];
+}
+
+export interface CatalogEvent {
+  id: string;
+  slug: string;
+  nome: string;
+  tipo: 'simples' | 'feira';
+  tipo_label: 'feira' | 'palestra' | 'workshop';
+  empresa: string;
+  logo_inicial: string;
+  cor_primaria: string;
+  data_inicio: string;
+  local_nome: string;
+  cidade: string;
+  capacidade_total: number;
+  vagas_restantes: number;
+  visibilidade: 'aberto' | 'convite';
+  status: 'rascunho' | 'publicado' | 'encerrado';
+  subeventos_count: number;
+  descricao: string;
 }
 
 export interface Participant {
@@ -75,6 +96,7 @@ export const initialEvent: EventData = {
   type: "simples",
   tipo: "feira",
   status: "publicado",
+  visibilidade: "aberto",
   questions: [
     { id: "q1", statement: "Qual é a sua área de atuação?", type: "seleção única", required: true, options: ["Tecnologia", "Finanças", "Marketing", "Outro"] },
     { id: "q2", statement: "Como ficou sabendo do evento?", type: "seleção única", required: false, options: ["LinkedIn", "Instagram", "Indicação", "E-mail"] }
@@ -178,4 +200,83 @@ export const mockSubeventoInscricoes: Inscricao[] = [
   { token: "QR-SUB-005", participante_id: "p3", subevento_id: "sub-003", nome: "Carla Souza" },
   { token: "QR-SUB-006", participante_id: "p4", subevento_id: "sub-003", nome: "Diego Alves" },
   { token: "QR-SUB-007", participante_id: "p5", subevento_id: "sub-003", nome: "Elena Rocha" },
+];
+
+export const catalogEvents: CatalogEvent[] = [
+  {
+    id: "evt-1",
+    slug: "imersao-quantdev-xp",
+    nome: "Imersão em QuantDev na XP Inc.",
+    tipo: "feira",
+    tipo_label: "feira",
+    empresa: "XP Inc.",
+    logo_inicial: "XP",
+    cor_primaria: "#314C5D",
+    data_inicio: "2025-05-15T09:00:00",
+    local_nome: "XP Inc.",
+    cidade: "São Paulo",
+    capacidade_total: 500,
+    vagas_restantes: 423,
+    visibilidade: "aberto",
+    status: "publicado",
+    subeventos_count: 4,
+    descricao: "Uma experiência imersiva de um dia inteiro dedicada à interseção entre finanças quantitativas e tecnologia.",
+  },
+  {
+    id: "evt-002",
+    slug: "feira-carreiras-btg-2025",
+    nome: "Feira de Carreiras BTG Pactual 2025",
+    tipo: "feira",
+    tipo_label: "feira",
+    empresa: "BTG Pactual",
+    logo_inicial: "BT",
+    cor_primaria: "#314C5D",
+    data_inicio: "2025-06-10T09:00:00",
+    local_nome: "BTG Pactual — Torre B",
+    cidade: "São Paulo",
+    capacidade_total: 1500,
+    vagas_restantes: 1243,
+    visibilidade: "aberto",
+    status: "publicado",
+    subeventos_count: 6,
+    descricao: "A maior feira de carreiras do BTG Pactual. Conecte-se com nosso time de tecnologia, finanças e operações.",
+  },
+  {
+    id: "evt-003",
+    slug: "workshop-python-financas-xp",
+    nome: "Workshop de Python para Finanças — XP Inc.",
+    tipo: "simples",
+    tipo_label: "workshop",
+    empresa: "XP Inc.",
+    logo_inicial: "XP",
+    cor_primaria: "#FF6982",
+    data_inicio: "2025-05-28T14:00:00",
+    local_nome: "Online — Zoom",
+    cidade: "Remoto",
+    capacidade_total: 100,
+    vagas_restantes: 12,
+    visibilidade: "convite",
+    status: "publicado",
+    subeventos_count: 0,
+    descricao: "Workshop intensivo de Python aplicado a finanças quantitativas. Vagas muito limitadas.",
+  },
+  {
+    id: "evt-004",
+    slug: "palestra-futuro-mercado-financeiro",
+    nome: "Palestra: O Futuro do Mercado Financeiro Brasileiro",
+    tipo: "simples",
+    tipo_label: "palestra",
+    empresa: "Blūmi Talents",
+    logo_inicial: "BL",
+    cor_primaria: "#DEFF66",
+    data_inicio: "2025-07-03T19:00:00",
+    local_nome: "Auditório Faria Lima",
+    cidade: "São Paulo",
+    capacidade_total: 300,
+    vagas_restantes: 287,
+    visibilidade: "aberto",
+    status: "publicado",
+    subeventos_count: 0,
+    descricao: "Uma noite de debates sobre tendências, regulação e oportunidades no mercado financeiro brasileiro.",
+  },
 ];

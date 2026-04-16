@@ -46,6 +46,9 @@ export default function EventPublic() {
   });
 
   const [subForm, setSubForm] = useState({ name: "", email: "", password: "" });
+  const [inviteCode, setInviteCode] = useState("");
+  const [inviteError, setInviteError] = useState(false);
+  const isConvite = event.visibilidade === "convite";
 
   const handleChange = (field: string, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -139,11 +142,14 @@ export default function EventPublic() {
               </div>
               <Button
                 data-testid="button-register"
-                onClick={() => setShowModal(true)}
+                onClick={() => { setShowModal(true); setInviteCode(""); setInviteError(false); }}
                 className="w-full h-14 text-lg bg-[#DEFF66] text-[#314C5D] font-bold hover:bg-[#c9eb55] rounded-xl"
               >
                 Quero me inscrever
               </Button>
+              {isConvite && (
+                <p className="text-xs text-center text-gray-500 mt-2">Este evento é por convite. Você precisará de um código.</p>
+              )}
             </div>
           </div>
         </div>
@@ -279,6 +285,21 @@ export default function EventPublic() {
             <div className="p-6 space-y-4">
               {step === 1 && (
                 <>
+                  {isConvite && (
+                    <div>
+                      <Label className="text-sm font-medium text-[#314C5D]">Código de convite <span className="text-[#FF6982]">*</span></Label>
+                      <Input
+                        data-testid="input-invite-code"
+                        value={inviteCode}
+                        onChange={(e) => { setInviteCode(e.target.value); setInviteError(false); }}
+                        placeholder="Digite seu código de convite"
+                        className={`mt-1.5 rounded-xl ${inviteError ? "border-[#FF6982] focus-visible:ring-[#FF6982]" : ""}`}
+                      />
+                      {inviteError && (
+                        <p className="text-[#FF6982] text-xs mt-1.5">Código de convite inválido. Verifique e tente novamente.</p>
+                      )}
+                    </div>
+                  )}
                   <div>
                     <Label className="text-sm font-medium text-[#314C5D]">Nome completo</Label>
                     <Input
@@ -330,8 +351,14 @@ export default function EventPublic() {
                   </div>
                   <Button
                     data-testid="button-next-step"
-                    onClick={() => setStep(2)}
-                    disabled={!form.name || !form.email}
+                    onClick={() => {
+                      if (isConvite && inviteCode.trim().toUpperCase() !== "BLUEMI2025") {
+                        setInviteError(true);
+                        return;
+                      }
+                      setStep(2);
+                    }}
+                    disabled={!form.name || !form.email || (isConvite && !inviteCode.trim())}
                     className="w-full h-12 bg-[#DEFF66] text-[#314C5D] font-bold rounded-xl hover:bg-[#c9eb55] gap-2"
                   >
                     Próximo <ChevronRight size={16} />
@@ -406,13 +433,23 @@ export default function EventPublic() {
             <p className="text-white/80 mb-8">
               Seu QR code foi enviado para o seu e-mail.
             </p>
-            <Button
-              data-testid="button-close-success"
-              onClick={() => setShowSuccess(false)}
-              className="bg-[#DEFF66] text-[#314C5D] font-bold rounded-xl px-8 h-12 hover:bg-[#c9eb55]"
-            >
-              Fechar
-            </Button>
+            <div className="flex flex-col gap-3">
+              <Button
+                data-testid="button-success-minha-area"
+                onClick={() => { setShowSuccess(false); setLocation("/minha-area"); }}
+                className="bg-[#DEFF66] text-[#314C5D] font-bold rounded-xl px-8 h-12 hover:bg-[#c9eb55]"
+              >
+                Ver meus eventos
+              </Button>
+              <Button
+                data-testid="button-close-success"
+                onClick={() => setShowSuccess(false)}
+                variant="ghost"
+                className="text-white/70 hover:text-white hover:bg-white/10 rounded-xl h-12"
+              >
+                Fechar
+              </Button>
+            </div>
           </div>
         </div>
       )}

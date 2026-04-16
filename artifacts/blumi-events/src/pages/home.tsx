@@ -53,8 +53,16 @@ export default function Home() {
 
           <Button 
             variant="outline"
-            onClick={() => setLocation("/eventos/imersao-quantdev-xp")}
+            onClick={() => setLocation("/eventos")}
             className="w-full mt-4"
+          >
+            Explorar catálogo de eventos
+          </Button>
+
+          <Button 
+            variant="outline"
+            onClick={() => setLocation("/eventos/imersao-quantdev-xp")}
+            className="w-full"
           >
             Ver página pública do evento
           </Button>

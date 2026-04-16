@@ -4,6 +4,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/hooks/use-auth";
 import { EventStoreProvider } from "@/hooks/use-event-store";
+import { PrototypeBanner } from "@/components/prototype-banner";
 import Home from "@/pages/home";
 import NewEvent from "@/pages/admin/new-event";
 import EventDetail from "@/pages/admin/event-detail";
@@ -18,17 +19,20 @@ const queryClient = new QueryClient();
 
 function Router() {
   return (
-    <Switch>
-      <Route path="/" component={Home} />
-      <Route path="/admin/eventos/novo" component={NewEvent} />
-      <Route path="/admin/eventos/:id" component={EventDetail} />
-      <Route path="/admin/checkin/:id" component={CheckinPage} />
-      <Route path="/eventos" component={EventCatalog} />
-      <Route path="/eventos/:eventSlug/:subSlug" component={SubeventPublic} />
-      <Route path="/eventos/:slug" component={EventPublic} />
-      <Route path="/minha-area" component={ParticipantArea} />
-      <Route component={NotFound} />
-    </Switch>
+    <>
+      <PrototypeBanner />
+      <Switch>
+        <Route path="/" component={Home} />
+        <Route path="/admin/eventos/novo" component={NewEvent} />
+        <Route path="/admin/eventos/:id" component={EventDetail} />
+        <Route path="/admin/checkin/:id" component={CheckinPage} />
+        <Route path="/eventos" component={EventCatalog} />
+        <Route path="/eventos/:eventSlug/:subSlug" component={SubeventPublic} />
+        <Route path="/eventos/:slug" component={EventPublic} />
+        <Route path="/minha-area" component={ParticipantArea} />
+        <Route component={NotFound} />
+      </Switch>
+    </>
   );
 }
 

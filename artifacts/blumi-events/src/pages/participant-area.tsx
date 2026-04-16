@@ -1,9 +1,10 @@
 import { useState } from "react";
+import { useLocation } from "wouter";
 import { ParticipantLayout } from "@/components/layout/participant-layout";
 import { useEventStore } from "@/hooks/use-event-store";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Calendar, MapPin, Download } from "lucide-react";
+import { Calendar, MapPin, Download, ExternalLink, X, Award } from "lucide-react";
 
 function FakeQRCode({ token, size = 110 }: { token: string; size?: number }) {
   const seed = token.split("").reduce((acc, c) => acc + c.charCodeAt(0), 0);
@@ -48,9 +49,12 @@ function formatSubTime(iso: string) {
 
 export default function ParticipantArea() {
   const { event, participants, subeventoCheckins } = useEventStore();
+  const [, setLocation] = useLocation();
   const [activeTab, setActiveTab] = useState("ativos");
+  const [qrModal, setQrModal] = useState<{ token: string; label: string } | null>(null);
+  const [certModal, setCertModal] = useState<{ eventName: string; participantName: string; date: string } | null>(null);
 
-  const myParticipant = participants[3];
+  const myParticipant = participants[0];
   const mySubeventoIds = myParticipant?.inscricoes_subeventos || [];
   const mySubs = (event.subeventos || []).filter((s) => mySubeventoIds.includes(s.id));
   const isFeira = event.tipo === "feira";
@@ -70,9 +74,19 @@ export default function ParticipantArea() {
 
   return (
     <ParticipantLayout>
-      <div className="mb-8">
-        <h1 className="text-3xl font-heading font-bold text-[#314C5D]">Minha Área</h1>
-        <p className="text-[#314C5D]/60 mt-1">Gerencie suas inscrições e certificados</p>
+      <div className="mb-8 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-heading font-bold text-[#314C5D]">Minha Área</h1>
+          <p className="text-[#314C5D]/60 mt-1">Gerencie suas inscrições e certificados</p>
+        </div>
+        <Button
+          onClick={() => setLocation("/eventos")}
+          variant="outline"
+          className="border-[#314C5D] text-[#314C5D] rounded-xl gap-2 shrink-0"
+        >
+          <ExternalLink size={16} />
+          Ver mais eventos
+        </Button>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
@@ -113,14 +127,25 @@ export default function ParticipantArea() {
                     <span>{event.venueName}, {event.venueAddress}</span>
                   </div>
                 </div>
-                <div className="mt-4">
+                <div className="mt-4 flex items-center gap-3">
                   <span className="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-[#DEFF66] text-[#314C5D]">
                     Inscrito
                   </span>
+                  <button
+                    onClick={() => setLocation(`/eventos/${event.slug}`)}
+                    className="text-xs text-[#314C5D] font-medium underline hover:no-underline"
+                  >
+                    Ver detalhes
+                  </button>
                 </div>
               </div>
               <div className="flex flex-col items-center gap-2">
-                <FakeQRCode token={myParticipant?.token || "QR-004"} />
+                <button
+                  onClick={() => setQrModal({ token: myParticipant?.token || "QR-004", label: event.name })}
+                  className="cursor-pointer hover:opacity-80 transition-opacity"
+                >
+                  <FakeQRCode token={myParticipant?.token || "QR-004"} />
+                </button>
                 <p className="text-xs text-gray-500 font-mono">{myParticipant?.token || "QR-004"}</p>
               </div>
             </div>
@@ -163,7 +188,12 @@ export default function ParticipantArea() {
                             {isPresente ? "Presente" : "Inscrito"}
                           </span>
                           <div className="flex flex-col items-center gap-1">
-                            <FakeQRCode token={subToken} size={70} />
+                            <button
+                              onClick={() => setQrModal({ token: subToken, label: s.nome })}
+                              className="cursor-pointer hover:opacity-80 transition-opacity"
+                            >
+                              <FakeQRCode token={subToken} size={70} />
+                            </button>
                             <p className="text-[10px] text-gray-400 font-mono">{subToken}</p>
                           </div>
                         </div>
@@ -202,6 +232,7 @@ export default function ParticipantArea() {
                   data-testid="button-download-certificate"
                   variant="outline"
                   className="border-[#314C5D] text-[#314C5D] rounded-xl gap-2"
+                  onClick={() => setCertModal({ eventName: pastEvent.name, participantName: myParticipant?.name || "Diego Alves", date: pastEvent.date })}
                 >
                   <Download size={16} />
                   Baixar certificado
@@ -223,6 +254,7 @@ export default function ParticipantArea() {
                         variant="outline"
                         size="sm"
                         className="border-[#314C5D] text-[#314C5D] rounded-lg gap-1.5 text-xs"
+                        onClick={() => setCertModal({ eventName: ps.nome, participantName: myParticipant?.name || "Diego Alves", date: "10/03/2025" })}
                       >
                         <Download size={14} />
                         Baixar certificado
@@ -237,6 +269,47 @@ export default function ParticipantArea() {
           </div>
         </TabsContent>
       </Tabs>
+
+      {qrModal && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setQrModal(null)}>
+          <div className="bg-white rounded-2xl p-8 text-center shadow-2xl max-w-sm w-full" onClick={(e) => e.stopPropagation()}>
+            <button onClick={() => setQrModal(null)} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+              <X size={20} />
+            </button>
+            <h3 className="font-heading font-bold text-[#314C5D] text-lg mb-4">{qrModal.label}</h3>
+            <div className="flex justify-center mb-4">
+              <FakeQRCode token={qrModal.token} size={200} />
+            </div>
+            <p className="text-sm text-gray-500 font-mono">{qrModal.token}</p>
+            <p className="text-xs text-gray-400 mt-2">Apresente este QR code na entrada</p>
+          </div>
+        </div>
+      )}
+
+      {certModal && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setCertModal(null)}>
+          <div className="bg-[#314C5D] rounded-2xl p-10 text-center shadow-2xl max-w-lg w-full relative" onClick={(e) => e.stopPropagation()}>
+            <button onClick={() => setCertModal(null)} className="absolute top-4 right-4 text-white/40 hover:text-white">
+              <X size={20} />
+            </button>
+            <div className="border-2 border-[#DEFF66]/30 rounded-xl p-8">
+              <div className="w-16 h-16 rounded-full bg-[#DEFF66] flex items-center justify-center mx-auto mb-6">
+                <Award size={32} className="text-[#314C5D]" />
+              </div>
+              <p className="text-white/60 text-xs uppercase tracking-widest mb-4">Certificado de participação</p>
+              <h3 className="font-heading font-bold text-white text-xl mb-2">{certModal.participantName}</h3>
+              <p className="text-white/70 text-sm mb-6">participou do evento</p>
+              <p className="text-[#DEFF66] font-heading font-bold text-lg mb-4">{certModal.eventName}</p>
+              <p className="text-white/50 text-xs">{certModal.date}</p>
+              <div className="mt-6 flex justify-center gap-2 text-xs text-white/30">
+                <span>blūmi events</span>
+                <span>•</span>
+                <span>Certificado digital</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </ParticipantLayout>
   );
 }

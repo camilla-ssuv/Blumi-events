@@ -163,7 +163,7 @@ export default function CheckinPage() {
           className="flex items-center gap-2 text-white/70 hover:text-white transition-colors"
         >
           <ArrowLeft size={20} />
-          <span className="text-sm">Voltar</span>
+          <span className="text-sm">Voltar ao painel do evento</span>
         </button>
         <span className="font-heading font-bold text-lg">{event.name}</span>
         <Button
@@ -277,7 +277,7 @@ export default function CheckinPage() {
                 </div>
                 <div>
                   <p className="font-heading font-bold text-xl">{result.name}</p>
-                  <p className="text-white/80">Ja registrado as {result.time}</p>
+                  <p className="text-white/80">Já registrado às {result.time}</p>
                 </div>
               </div>
             )}
@@ -287,8 +287,8 @@ export default function CheckinPage() {
                   ?
                 </div>
                 <div>
-                  <p className="font-heading font-bold text-xl">Participante nao encontrado</p>
-                  <p className="text-white/80">Verifique o codigo e tente novamente</p>
+                  <p className="font-heading font-bold text-xl">Participante não encontrado</p>
+                  <p className="text-white/80">Verifique o código e tente novamente</p>
                 </div>
               </div>
             )}
@@ -299,7 +299,7 @@ export default function CheckinPage() {
                 </div>
                 <div>
                   <p className="font-heading font-bold text-xl">{result.name}</p>
-                  <p className="text-white/80">Participante nao inscrito neste subevento</p>
+                  <p className="text-white/80">Participante não inscrito neste subevento</p>
                 </div>
               </div>
             )}
@@ -308,7 +308,7 @@ export default function CheckinPage() {
       </div>
 
       <div className="border-t border-white/10 p-4">
-        <p className="text-xs text-white/40 mb-3 font-medium uppercase tracking-wider">Ultimos check-ins</p>
+        <p className="text-xs text-white/40 mb-3 font-medium uppercase tracking-wider">Últimos check-ins</p>
         <div className="space-y-2 max-h-48 overflow-y-auto">
           {checkInLogs.slice(0, 10).map((log, i) => (
             <div key={i} className="flex items-center justify-between text-sm py-1.5 px-3 rounded-lg bg-white/5">

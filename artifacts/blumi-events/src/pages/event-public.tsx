@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { useEventStore } from "@/hooks/use-event-store";
-import { useLocation } from "wouter";
+import { useLocation, useParams } from "wouter";
+import { Navbar } from "@/components/navbar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { MapPin, Calendar, Clock, Users, Check, ChevronRight, Info } from "lucide-react";
-import type { Subevento } from "@/lib/mock-data";
+import type { Subevento, EventData } from "@/lib/mock-data";
 
 function formatSubDate(iso: string) {
   const d = new Date(iso);
@@ -13,6 +14,16 @@ function formatSubDate(iso: string) {
   const month = String(d.getMonth() + 1).padStart(2, "0");
   const hour = d.getHours();
   return `${day}/${month} às ${hour}h`;
+}
+
+function formatCatalogDate(iso: string) {
+  const d = new Date(iso);
+  return `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}/${d.getFullYear()}`;
+}
+
+function formatCatalogTime(iso: string) {
+  const d = new Date(iso);
+  return `${d.getHours()}h`;
 }
 
 const tipoColors: Record<string, string> = {
@@ -25,7 +36,9 @@ const tipoColors: Record<string, string> = {
 type SubFilter = "todos" | "stand" | "palestra" | "workshop";
 
 export default function EventPublic() {
-  const { event, addParticipant } = useEventStore();
+  const params = useParams<{ slug: string }>();
+  const slug = params.slug;
+  const { event: storeEvent, addParticipant, catalogEventsList } = useEventStore();
   const [, setLocation] = useLocation();
   const [showModal, setShowModal] = useState(false);
   const [step, setStep] = useState(1);
@@ -48,6 +61,33 @@ export default function EventPublic() {
   const [subForm, setSubForm] = useState({ name: "", email: "", password: "" });
   const [inviteCode, setInviteCode] = useState("");
   const [inviteError, setInviteError] = useState(false);
+
+  const isStoreEvent = storeEvent.slug === slug;
+  const catalogEntry = catalogEventsList.find((e) => e.slug === slug);
+
+  const event: EventData = isStoreEvent
+    ? storeEvent
+    : {
+        id: catalogEntry?.id || "",
+        slug: catalogEntry?.slug || slug || "",
+        name: catalogEntry?.nome || "Evento",
+        date: catalogEntry ? formatCatalogDate(catalogEntry.data_inicio) : "",
+        time: catalogEntry ? formatCatalogTime(catalogEntry.data_inicio) : "",
+        venueName: catalogEntry?.local_nome || "",
+        venueAddress: catalogEntry?.cidade || "",
+        maxCapacity: catalogEntry?.capacidade_total || 0,
+        type: "simples",
+        tipo: catalogEntry?.tipo || "simples",
+        status: catalogEntry?.status || "publicado",
+        visibilidade: catalogEntry?.visibilidade || "aberto",
+        questions: [],
+        subeventos: [],
+      };
+
+  const description = isStoreEvent
+    ? "Uma experiência imersiva de um dia inteiro dedicada à interseção entre finanças quantitativas e tecnologia. Aprenda com especialistas da XP Inc. sobre modelos quantitativos, algoritmos de trading, infraestrutura de dados e muito mais. Ideal para desenvolvedores, engenheiros de dados e profissionais de finanças que querem explorar o mundo de QuantDev."
+    : catalogEntry?.descricao || "";
+
   const isConvite = event.visibilidade === "convite";
 
   const handleChange = (field: string, value: string) => {
@@ -92,11 +132,19 @@ export default function EventPublic() {
   const publishedSubs = (event.subeventos || []).filter((s) => s.status === "publicado");
   const filteredSubs = subFilter === "todos" ? publishedSubs : publishedSubs.filter((s) => s.tipo === subFilter);
 
+  const gradientBg = catalogEntry
+    ? catalogEntry.cor_primaria === "#314C5D"
+      ? "linear-gradient(135deg, #314C5D 0%, #29D4FF 100%)"
+      : catalogEntry.cor_primaria === "#DEFF66"
+      ? "linear-gradient(135deg, #314C5D 0%, #DEFF66 100%)"
+      : `linear-gradient(135deg, ${catalogEntry.cor_primaria} 0%, ${catalogEntry.cor_primaria}99 100%)`
+    : "linear-gradient(135deg, #314C5D 0%, #29D4FF 100%)";
+
   return (
     <div className="min-h-screen bg-[#FBF7EB]">
+      <Navbar />
       <header className="bg-[#314C5D] text-white py-6 px-6">
         <div className="max-w-4xl mx-auto">
-          <p className="text-sm text-white/60 font-medium mb-1">blūmi events</p>
           <h1 className="text-3xl md:text-4xl font-heading font-bold mb-2">{event.name}</h1>
           <div className="flex flex-wrap gap-4 text-sm text-white/80">
             <span className="flex items-center gap-1.5"><Calendar size={14} /> {event.date}</span>
@@ -106,7 +154,10 @@ export default function EventPublic() {
         </div>
       </header>
 
-      <div className="h-48 md:h-64 bg-gradient-to-r from-[#314C5D] to-[#29D4FF] relative overflow-hidden">
+      <div
+        className="h-48 md:h-64 relative overflow-hidden"
+        style={{ background: gradientBg }}
+      >
         <div className="absolute inset-0 opacity-10" style={{
           backgroundImage: `radial-gradient(circle at 20% 50%, white 1px, transparent 1px), radial-gradient(circle at 80% 30%, white 1px, transparent 1px)`,
           backgroundSize: "40px 40px, 60px 60px",
@@ -118,12 +169,7 @@ export default function EventPublic() {
           <div className="md:col-span-2 space-y-6">
             <div>
               <h2 className="text-2xl font-heading font-bold text-[#314C5D] mb-4">Sobre o evento</h2>
-              <p className="text-gray-700 leading-relaxed">
-                Uma experiência imersiva de um dia inteiro dedicada à interseção entre finanças quantitativas
-                e tecnologia. Aprenda com especialistas da XP Inc. sobre modelos quantitativos, algoritmos de
-                trading, infraestrutura de dados e muito mais. Ideal para desenvolvedores, engenheiros de dados
-                e profissionais de finanças que querem explorar o mundo de QuantDev.
-              </p>
+              <p className="text-gray-700 leading-relaxed">{description}</p>
             </div>
           </div>
 
@@ -367,37 +413,41 @@ export default function EventPublic() {
               )}
               {step === 2 && (
                 <>
-                  {event.questions.map((q) => (
-                    <div key={q.id}>
-                      <Label className="text-sm font-medium text-[#314C5D]">
-                        {q.statement}
-                        {q.required && <span className="text-[#FF6982] ml-1">*</span>}
-                      </Label>
-                      {q.type === "texto livre" ? (
-                        <Input
-                          data-testid={`input-screening-${q.id}`}
-                          className="mt-1.5 rounded-xl"
-                          placeholder="Sua resposta..."
-                          onChange={(e) => handleChange(q.id, e.target.value)}
-                        />
-                      ) : (
-                        <div className="mt-2 space-y-2">
-                          {q.options?.map((opt) => (
-                            <label key={opt} className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-colors ${form[q.id as keyof typeof form] === opt ? "border-[#314C5D] bg-[#314C5D]/5" : "border-gray-200"}`}>
-                              <input
-                                type={q.type === "seleção única" ? "radio" : "checkbox"}
-                                name={q.id}
-                                checked={form[q.id as keyof typeof form] === opt}
-                                onChange={() => handleChange(q.id, opt)}
-                                className="accent-[#314C5D]"
-                              />
-                              <span className="text-sm">{opt}</span>
-                            </label>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  ))}
+                  {event.questions.length > 0 ? (
+                    event.questions.map((q) => (
+                      <div key={q.id}>
+                        <Label className="text-sm font-medium text-[#314C5D]">
+                          {q.statement}
+                          {q.required && <span className="text-[#FF6982] ml-1">*</span>}
+                        </Label>
+                        {q.type === "texto livre" ? (
+                          <Input
+                            data-testid={`input-screening-${q.id}`}
+                            className="mt-1.5 rounded-xl"
+                            placeholder="Sua resposta..."
+                            onChange={(e) => handleChange(q.id, e.target.value)}
+                          />
+                        ) : (
+                          <div className="mt-2 space-y-2">
+                            {q.options?.map((opt) => (
+                              <label key={opt} className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-colors ${form[q.id as keyof typeof form] === opt ? "border-[#314C5D] bg-[#314C5D]/5" : "border-gray-200"}`}>
+                                <input
+                                  type={q.type === "seleção única" ? "radio" : "checkbox"}
+                                  name={q.id}
+                                  checked={form[q.id as keyof typeof form] === opt}
+                                  onChange={() => handleChange(q.id, opt)}
+                                  className="accent-[#314C5D]"
+                                />
+                                <span className="text-sm">{opt}</span>
+                              </label>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-gray-500 text-sm text-center py-4">Nenhuma pergunta de triagem para este evento.</p>
+                  )}
                   <div className="flex gap-3 pt-2">
                     <Button
                       variant="outline"
@@ -505,7 +555,7 @@ export default function EventPublic() {
                     />
                   </div>
                   <div>
-                    <Label className="text-sm font-medium text-[#314C5D]">Senha</Label>
+                    <Label className="text-sm font-medium text-[#314C5D]">Senha *</Label>
                     <Input
                       data-testid="input-sub-reg-password"
                       type="password"
@@ -527,11 +577,19 @@ export default function EventPublic() {
               )}
               {subStep === 2 && (
                 <>
-                  <div className="text-center py-4">
-                    <p className="text-sm text-gray-500 mb-4">Nenhuma pergunta adicional para este subevento.</p>
+                  <div className="bg-[#FBF7EB] rounded-xl p-4 space-y-2">
+                    <p className="font-heading font-bold text-[#314C5D]">{subModal.nome}</p>
+                    <p className="text-sm text-gray-600">{subModal.descricao}</p>
+                    <p className="text-xs text-gray-500">
+                      {formatSubDate(subModal.data_inicio)}
+                    </p>
                   </div>
-                  <div className="flex gap-3">
-                    <Button variant="outline" onClick={() => setSubStep(1)} className="flex-1 h-12 rounded-xl">
+                  <div className="flex gap-3 pt-2">
+                    <Button
+                      variant="outline"
+                      onClick={() => setSubStep(1)}
+                      className="flex-1 h-12 rounded-xl"
+                    >
                       Voltar
                     </Button>
                     <Button
@@ -556,20 +614,16 @@ export default function EventPublic() {
               <Check size={40} className="text-[#314C5D]" />
             </div>
             <h3 className="text-2xl font-heading font-bold text-white mb-3">
-              Inscrição confirmada no {subModal?.nome || "subevento"}!
+              Inscrição confirmada!
             </h3>
-            <p className="text-white/80 mb-2">
-              Você também foi inscrito automaticamente no evento principal.
-            </p>
-            <p className="text-white/60 text-sm mb-8">
-              Seu QR code foi enviado para o seu e-mail.
+            <p className="text-white/80 mb-8">
+              Você está inscrito na atividade.
             </p>
             <Button
-              data-testid="button-sub-success-area"
-              onClick={() => { setSubShowSuccess(false); setLocation("/minha-area"); }}
+              onClick={() => setSubShowSuccess(false)}
               className="bg-[#DEFF66] text-[#314C5D] font-bold rounded-xl px-8 h-12 hover:bg-[#c9eb55]"
             >
-              Ver minha área
+              Fechar
             </Button>
           </div>
         </div>

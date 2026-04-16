@@ -1,0 +1,60 @@
+Faça uma revisão final e corrija inconsistências. NÃO adicione novas funcionalidades — apenas garanta que os 7 fluxos funcionem de ponta a ponta.
+
+========================================
+FLUXO 1 — CATÁLOGO
+========================================
+- 4 cards aparecem em /eventos
+- Filtro "Feira" → 2 eventos
+- Filtro "Remoto" → 1 evento (Workshop)
+- Badge "Por convite" aparece no Workshop de Python
+- Vagas do Workshop em laranja (12 vagas)
+
+========================================
+FLUXO 2 — INSCRIÇÃO EVENTO ABERTO
+========================================
+- "Inscrever-se" no QuantDev → modal de inscrição
+- Confirmar → redireciona para /minha-area
+- Evento aparece em "Meus eventos" com QR code
+
+========================================
+FLUXO 3 — EVENTO POR CONVITE
+========================================
+- "Ver evento" no Workshop → pede código de convite
+- "BLUEMI2025" → avança para inscrição
+- Código errado → erro em #FF6982
+
+========================================
+FLUXO 4 — ADMIN CRIA EVENTO
+========================================
+- /admin/eventos/novo → preencher → publicar
+- Redireciona para /admin/eventos/[id]
+- Evento aparece no catálogo /eventos
+
+========================================
+FLUXO 5 — TRIAGEM
+========================================
+- Criar pergunta → aparece na lista
+- Editar → modal com dados preenchidos
+- Excluir → some da lista
+
+========================================
+FLUXO 6 — CHECK-IN
+========================================
+- "QR-004" + Enter → verde "Diego Alves — Check-in confirmado!"
+- "QR-001" + Enter → vermelho "Ana Costa — Já registrado às 09h12"
+- "QR-999" + Enter → laranja "Participante não encontrado"
+- Contador atualiza após cada check-in
+
+========================================
+FLUXO 7 — MINHA ÁREA
+========================================
+- Logado como Ana Costa em /minha-area
+- "Meus eventos": evento QuantDev com QR code
+- QR clicável → amplia em modal
+- "Ver mais eventos" → volta para /eventos
+
+========================================
+AJUSTE FINAL
+========================================
+Garantir que o protótipo roda sem erros de console (F12 → Console).
+Remover qualquer console.log() de debug.

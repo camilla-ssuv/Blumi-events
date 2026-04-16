@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useEventStore } from "@/hooks/use-event-store";
 import { useLocation, useRoute } from "wouter";
+import { Navbar } from "@/components/navbar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -69,6 +70,7 @@ export default function SubeventPublic() {
 
   return (
     <div className="min-h-screen bg-[#FBF7EB]">
+      <Navbar />
       <header className="text-white py-8 px-6 relative" style={{ backgroundColor: subevento.cor_primaria || "#314C5D" }}>
         <div className="max-w-3xl mx-auto">
           <button

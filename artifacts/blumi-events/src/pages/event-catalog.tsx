@@ -1,8 +1,10 @@
 import { useState, useMemo } from "react";
 import { useLocation, useSearch } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
-import { catalogEvents, type CatalogEvent } from "@/lib/mock-data";
-import { Search, Calendar, MapPin, Tent, X } from "lucide-react";
+import { useEventStore } from "@/hooks/use-event-store";
+import { Navbar } from "@/components/navbar";
+import { type CatalogEvent } from "@/lib/mock-data";
+import { Search, Calendar, MapPin, Tent } from "lucide-react";
 
 const tipoLabelColors: Record<string, { bg: string; text: string }> = {
   feira: { bg: "#314C5D", text: "#FFFFFF" },
@@ -46,6 +48,7 @@ function SkeletonCard() {
 
 export default function EventCatalog() {
   const { role } = useAuth();
+  const { catalogEventsList } = useEventStore();
   const [, setLocation] = useLocation();
   const searchString = useSearch();
   const params = new URLSearchParams(searchString);
@@ -61,17 +64,17 @@ export default function EventCatalog() {
   const enrolledEventIds = isLoggedIn ? ["evt-1"] : [];
 
   const cidades = useMemo(() => {
-    const set = new Set(catalogEvents.map((e) => e.cidade));
+    const set = new Set(catalogEventsList.map((e) => e.cidade));
     return Array.from(set).sort();
-  }, []);
+  }, [catalogEventsList]);
 
   const empresas = useMemo(() => {
-    const set = new Set(catalogEvents.map((e) => e.empresa));
+    const set = new Set(catalogEventsList.map((e) => e.empresa));
     return Array.from(set).sort();
-  }, []);
+  }, [catalogEventsList]);
 
   const filtered = useMemo(() => {
-    let result = catalogEvents.filter((e) => e.status === "publicado");
+    let result = catalogEventsList.filter((e) => e.status === "publicado");
 
     if (search.trim()) {
       const q = search.toLowerCase();
@@ -117,7 +120,7 @@ export default function EventCatalog() {
     }
 
     return result;
-  }, [search, tipoFilter, dataFilter, cidadeFilter, empresaFilter]);
+  }, [search, tipoFilter, dataFilter, cidadeFilter, empresaFilter, catalogEventsList]);
 
   const updateUrl = (newTipo: TipoFilter, newData: DataFilter, newCidade: string, newEmpresa: string, newQ: string) => {
     const p = new URLSearchParams();
@@ -155,33 +158,7 @@ export default function EventCatalog() {
 
   return (
     <div className="min-h-screen bg-[#FBF7EB]">
-      <nav className="bg-[#314C5D] px-6 py-3.5 flex items-center justify-between">
-        <button onClick={() => setLocation("/eventos")} className="text-white font-heading font-bold text-lg">
-          blūmi events
-        </button>
-        <div className="flex items-center gap-4">
-          {isLoggedIn && (
-            <button
-              onClick={() => setLocation("/minha-area")}
-              className="text-white/80 hover:text-white text-sm font-medium transition-colors"
-            >
-              Meus eventos
-            </button>
-          )}
-          {isLoggedIn ? (
-            <div className="w-9 h-9 rounded-full bg-[#DEFF66] flex items-center justify-center text-[#314C5D] font-bold text-sm">
-              JP
-            </div>
-          ) : (
-            <button
-              onClick={() => setLocation("/")}
-              className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white text-sm font-medium rounded-lg transition-colors"
-            >
-              Entrar
-            </button>
-          )}
-        </div>
-      </nav>
+      <Navbar />
 
       <div className="bg-[#314C5D] px-6 pt-12 pb-14">
         <div className="max-w-5xl mx-auto text-center">

@@ -5,9 +5,11 @@ import {
   type ScreeningQuestion,
   type Subevento,
   type Inscricao,
+  type CatalogEvent,
   initialEvent,
   initialParticipants,
   mockSubeventoInscricoes,
+  catalogEvents,
 } from "@/lib/mock-data";
 
 interface CheckInLog {
@@ -28,6 +30,7 @@ interface EventStoreContextType {
   checkInLogs: CheckInLog[];
   subeventoInscricoes: Inscricao[];
   subeventoCheckins: Record<string, Set<string>>;
+  catalogEventsList: CatalogEvent[];
   updateEvent: (updates: Partial<EventData>) => void;
   addParticipant: (p: Participant) => void;
   doCheckIn: (token: string) => CheckInResult;
@@ -39,6 +42,7 @@ interface EventStoreContextType {
   addSubevento: (s: Subevento) => void;
   updateSubevento: (id: string, updates: Partial<Subevento>) => void;
   deleteSubevento: (id: string) => void;
+  addCatalogEvent: (e: CatalogEvent) => void;
 }
 
 const EventStoreContext = createContext<EventStoreContextType | undefined>(undefined);
@@ -48,6 +52,7 @@ export function EventStoreProvider({ children }: { children: ReactNode }) {
   const [participants, setParticipants] = useState<Participant[]>(initialParticipants);
   const [subeventoInscricoes] = useState<Inscricao[]>(mockSubeventoInscricoes);
   const [subeventoCheckins, setSubeventoCheckins] = useState<Record<string, Set<string>>>({});
+  const [catalogEventsList, setCatalogEventsList] = useState<CatalogEvent[]>(catalogEvents);
   const [checkInLogs, setCheckInLogs] = useState<CheckInLog[]>([
     { name: "Ana Costa", time: "09:12", origin: "QR Scanner" },
     { name: "Bruno Lima", time: "09:18", origin: "QR Scanner" },
@@ -192,6 +197,10 @@ export function EventStoreProvider({ children }: { children: ReactNode }) {
     }));
   }, []);
 
+  const addCatalogEvent = useCallback((e: CatalogEvent) => {
+    setCatalogEventsList((prev) => [...prev, e]);
+  }, []);
+
   return (
     <EventStoreContext.Provider
       value={{
@@ -200,6 +209,7 @@ export function EventStoreProvider({ children }: { children: ReactNode }) {
         checkInLogs,
         subeventoInscricoes,
         subeventoCheckins,
+        catalogEventsList,
         updateEvent,
         addParticipant,
         doCheckIn,
@@ -211,6 +221,7 @@ export function EventStoreProvider({ children }: { children: ReactNode }) {
         addSubevento,
         updateSubevento,
         deleteSubevento,
+        addCatalogEvent,
       }}
     >
       {children}

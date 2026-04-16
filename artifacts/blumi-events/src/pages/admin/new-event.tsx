@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 
 export default function NewEvent() {
   const [, setLocation] = useLocation();
-  const { updateEvent } = useEventStore();
+  const { updateEvent, addCatalogEvent } = useEventStore();
   const [form, setForm] = useState({
     name: "",
     description: "",
@@ -40,14 +40,45 @@ export default function NewEvent() {
   };
 
   const handlePublish = () => {
+    const evtName = form.name || "Novo Evento";
+    const newSlug = evtName.toLowerCase()
+      .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+    const isFeira = form.type === "feira com stands";
+
     updateEvent({
-      name: form.name || "Novo Evento",
+      name: evtName,
+      slug: newSlug,
       venueName: form.venueName,
       venueAddress: form.venueAddress,
       maxCapacity: Number(form.maxCapacity) || 100,
       type: form.type,
       status: "publicado",
+      tipo: isFeira ? "feira" : "simples",
     });
+
+    addCatalogEvent({
+      id: `evt-${Date.now()}`,
+      slug: newSlug,
+      nome: evtName,
+      tipo: isFeira ? "feira" : "simples",
+      tipo_label: isFeira ? "feira" : "workshop",
+      empresa: "Minha Empresa",
+      logo_inicial: evtName.substring(0, 2).toUpperCase(),
+      cor_primaria: "#314C5D",
+      data_inicio: form.startDate
+        ? `${form.startDate}T${form.startTime || "09:00"}:00`
+        : new Date().toISOString(),
+      local_nome: form.venueName || "A definir",
+      cidade: "São Paulo",
+      capacidade_total: Number(form.maxCapacity) || 100,
+      vagas_restantes: Number(form.maxCapacity) || 100,
+      visibilidade: "aberto",
+      status: "publicado",
+      subeventos_count: 0,
+      descricao: form.description || "Evento criado no protótipo.",
+    });
+
     setLocation("/admin/eventos/evt-1");
   };
 

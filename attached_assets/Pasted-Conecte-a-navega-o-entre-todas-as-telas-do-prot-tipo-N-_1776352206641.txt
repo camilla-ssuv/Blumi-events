@@ -1,0 +1,53 @@
+Conecte a navegação entre todas as telas do protótipo. NÃO crie novas telas nem altere conteúdo existente — apenas adicione links, botões de navegação e redirecionamentos que ainda estejam faltando.
+
+========================================
+1. NAVBAR GLOBAL
+========================================
+Criar um componente Navbar reutilizável em /components/Navbar.tsx com:
+- Logo "blūmi events" à esquerda → link para /eventos
+- À direita:
+  * Se não logado: botão "Entrar" (outline #314C5D) + botão "Criar conta" (#DEFF66)
+  * Se logado como participante: link "Meus eventos" → /minha-area | avatar com iniciais | "Sair"
+  * Se logado como admin: link "Painel admin" → /admin | avatar | "Sair"
+- Mobile: hamburger menu com drawer lateral
+
+Aplicar em: /eventos, /eventos/[slug], /minha-area
+
+========================================
+2. FLUXO: CATÁLOGO → LANDING → INSCRIÇÃO → MINHA ÁREA
+========================================
+- Card em /eventos: botão "Inscrever-se" → /eventos/[slug]
+- Landing page: botão "Quero me inscrever" → abre modal
+- Modal: ao confirmar → redireciona para /minha-area com banner "Inscrição confirmada!"
+- /minha-area: botão "Ver mais eventos" → /eventos
+
+========================================
+3. FLUXO: ADMIN → EVENTO → CHECK-IN
+========================================
+- /admin: lista de eventos → clicar → /admin/eventos/[id]
+- /admin/eventos/[id]: botão "Iniciar check-in" → /admin/checkin/[id]
+- /admin/checkin/[id]: link "← Voltar ao painel do evento" no topo
+
+========================================
+4. FLUXO: MINHA ÁREA → QR → CERTIFICADO
+========================================
+- Card do evento: botão "Ver detalhes" → /eventos/[slug]
+- Botão "Baixar certificado" → modal com prévia (fundo #314C5D, nome, evento, data)
+- QR code: ao clicar → amplia em modal
+
+========================================
+5. BOTÃO ENTRAR COMO (simulação de auth)
+========================================
+Banner discreto no topo de todas as páginas (só no protótipo):
+- Fundo #FBF7EB, borda inferior 1px cinza, texto 12px
+- "Protótipo — Entrar como:" + botão "Admin" + botão "Participante" + botão "Sair"
+- "Admin" → seta estado global para admin, redireciona para /admin
+- "Participante" → seta estado para Ana Costa, redireciona para /eventos
+
+========================================
+6. BREADCRUMB NO ADMIN
+========================================
+- /admin → "Página Inicial"
+- /admin/eventos → "Página Inicial • Eventos"
+- /admin/eventos/[id] → "Página Inicial • Eventos • [Nome do evento]"
+- /admin/checkin/[id] → "Página Inicial • Eventos • [Nome] • Check-in"

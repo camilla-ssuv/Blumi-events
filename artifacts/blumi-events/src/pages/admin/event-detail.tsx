@@ -1,15 +1,19 @@
 import { useState } from "react";
+import { useLocation } from "wouter";
 import { AdminLayout } from "@/components/layout/admin-layout";
 import { useEventStore } from "@/hooks/use-event-store";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ParticipantsTab } from "@/components/admin/participants-tab";
 import { QuestionsTab } from "@/components/admin/questions-tab";
 import { CheckinTab } from "@/components/admin/checkin-tab";
 import { SubeventosTab } from "@/components/admin/subeventos-tab";
+import { QrCode } from "lucide-react";
 
 export default function EventDetail() {
   const { event, participants } = useEventStore();
+  const [, setLocation] = useLocation();
   const [activeTab, setActiveTab] = useState("participantes");
 
   const checkedIn = participants.filter((p) => p.checkIn).length;
@@ -42,6 +46,13 @@ export default function EventDetail() {
               Feira
             </Badge>
           )}
+          <Button
+            onClick={() => setLocation(`/admin/checkin/${event.id}`)}
+            className="bg-[#DEFF66] text-[#314C5D] font-bold rounded-xl hover:bg-[#c9eb55] gap-2 ml-auto"
+          >
+            <QrCode size={18} />
+            Iniciar check-in
+          </Button>
         </div>
         <p className="text-[#314C5D]/70">
           {event.date} | {event.time} | {event.venueName}, {event.venueAddress}

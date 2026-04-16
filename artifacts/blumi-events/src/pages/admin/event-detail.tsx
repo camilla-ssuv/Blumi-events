@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ParticipantsTab } from "@/components/admin/participants-tab";
 import { QuestionsTab } from "@/components/admin/questions-tab";
 import { CheckinTab } from "@/components/admin/checkin-tab";
+import { SubeventosTab } from "@/components/admin/subeventos-tab";
 
 export default function EventDetail() {
   const { event, participants } = useEventStore();
@@ -15,6 +16,8 @@ export default function EventDetail() {
   const totalRegistered = participants.length;
   const spotsRemaining = event.maxCapacity - totalRegistered;
   const attendanceRate = totalRegistered > 0 ? Math.round((checkedIn / totalRegistered) * 100) : 0;
+
+  const isFeira = event.tipo === "feira";
 
   const statusConfig = {
     rascunho: { label: "Rascunho", className: "bg-gray-200 text-gray-700" },
@@ -34,6 +37,11 @@ export default function EventDetail() {
           <Badge data-testid="badge-status" className={`${status.className} font-semibold text-sm px-3 py-1 rounded-full`}>
             {status.label}
           </Badge>
+          {isFeira && (
+            <Badge className="bg-[#29D4FF] text-white font-semibold text-sm px-3 py-1 rounded-full">
+              Feira
+            </Badge>
+          )}
         </div>
         <p className="text-[#314C5D]/70">
           {event.date} | {event.time} | {event.venueName}, {event.venueAddress}
@@ -56,6 +64,15 @@ export default function EventDetail() {
           >
             Participantes
           </TabsTrigger>
+          {isFeira && (
+            <TabsTrigger
+              value="subeventos"
+              data-testid="tab-subeventos"
+              className="rounded-lg px-4 py-2 data-[state=active]:bg-[#314C5D] data-[state=active]:text-white"
+            >
+              Subeventos
+            </TabsTrigger>
+          )}
           <TabsTrigger
             value="triagem"
             data-testid="tab-screening"
@@ -75,6 +92,11 @@ export default function EventDetail() {
         <TabsContent value="participantes">
           <ParticipantsTab />
         </TabsContent>
+        {isFeira && (
+          <TabsContent value="subeventos">
+            <SubeventosTab />
+          </TabsContent>
+        )}
         <TabsContent value="triagem">
           <QuestionsTab />
         </TabsContent>

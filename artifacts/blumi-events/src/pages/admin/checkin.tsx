@@ -1,15 +1,17 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useEventStore } from "@/hooks/use-event-store";
 import { useLocation } from "wouter";
-import { Search, ArrowLeft, X } from "lucide-react";
+import { Search, ArrowLeft, X, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import type { Subevento } from "@/lib/mock-data";
 
 type CheckinResult = {
-  status: "success" | "already" | "not_found";
+  status: "success" | "already" | "not_found" | "not_subscribed";
   name?: string;
   initials?: string;
   time?: string;
+  label?: string;
 } | null;
 
 function playBeep() {
@@ -29,16 +31,24 @@ function playBeep() {
 }
 
 export default function CheckinPage() {
-  const { event, participants, checkInLogs, doCheckIn } = useEventStore();
+  const { event, participants, checkInLogs, doCheckIn, doSubeventoCheckIn } = useEventStore();
   const [, setLocation] = useLocation();
   const [scanInput, setScanInput] = useState("");
   const [result, setResult] = useState<CheckinResult>(null);
   const [showManualSearch, setShowManualSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedTarget, setSelectedTarget] = useState<string>("geral");
+  const [showDropdown, setShowDropdown] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   const checkedIn = participants.filter((p) => p.checkIn).length;
+  const publishedSubeventos = (event.subeventos || []).filter((s) => s.status === "publicado");
+  const selectedSubevento = publishedSubeventos.find((s) => s.id === selectedTarget);
+
+  const targetLabel = selectedTarget === "geral"
+    ? "Evento geral"
+    : selectedSubevento?.nome || "Evento geral";
 
   useEffect(() => {
     if (!showManualSearch && inputRef.current) {
@@ -49,6 +59,52 @@ export default function CheckinPage() {
   const handleScan = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" && scanInput.trim()) {
       const token = scanInput.trim();
+
+      if (selectedTarget === "geral") {
+        const res = doCheckIn(token);
+        if (res.status === "success" && res.participant) {
+          playBeep();
+          setResult({
+            status: "success",
+            name: res.participant.name,
+            initials: res.participant.name.split(" ").map((n) => n[0]).join(""),
+            label: "Check-in confirmado!",
+          });
+        } else if (res.status === "already" && res.participant) {
+          setResult({
+            status: "already",
+            name: res.participant.name,
+            time: res.participant.checkInTime,
+          });
+        } else {
+          setResult({ status: "not_found" });
+        }
+      } else if (selectedSubevento) {
+        const res = doSubeventoCheckIn(token, selectedSubevento);
+        if (res.status === "success" && res.participant) {
+          playBeep();
+          setResult({
+            status: "success",
+            name: res.participant.name,
+            initials: res.participant.name.split(" ").map((n) => n[0]).join(""),
+            label: res.label || "Check-in confirmado!",
+          });
+        } else if (res.status === "not_subscribed" && res.participant) {
+          setResult({
+            status: "not_subscribed",
+            name: res.participant.name,
+          });
+        } else {
+          setResult({ status: "not_found" });
+        }
+      }
+      setScanInput("");
+      setTimeout(() => setResult(null), 4000);
+    }
+  }, [scanInput, doCheckIn, doSubeventoCheckIn, selectedTarget, selectedSubevento]);
+
+  const handleManualCheckIn = (token: string) => {
+    if (selectedTarget === "geral") {
       const res = doCheckIn(token);
       if (res.status === "success" && res.participant) {
         playBeep();
@@ -56,6 +112,7 @@ export default function CheckinPage() {
           status: "success",
           name: res.participant.name,
           initials: res.participant.name.split(" ").map((n) => n[0]).join(""),
+          label: "Check-in confirmado!",
         });
       } else if (res.status === "already" && res.participant) {
         setResult({
@@ -63,29 +120,25 @@ export default function CheckinPage() {
           name: res.participant.name,
           time: res.participant.checkInTime,
         });
+      }
+    } else if (selectedSubevento) {
+      const res = doSubeventoCheckIn(token, selectedSubevento);
+      if (res.status === "success" && res.participant) {
+        playBeep();
+        setResult({
+          status: "success",
+          name: res.participant.name,
+          initials: res.participant.name.split(" ").map((n) => n[0]).join(""),
+          label: res.label || "Check-in confirmado!",
+        });
+      } else if (res.status === "not_subscribed" && res.participant) {
+        setResult({
+          status: "not_subscribed",
+          name: res.participant.name,
+        });
       } else {
         setResult({ status: "not_found" });
       }
-      setScanInput("");
-      setTimeout(() => setResult(null), 4000);
-    }
-  }, [scanInput, doCheckIn]);
-
-  const handleManualCheckIn = (token: string) => {
-    const res = doCheckIn(token);
-    if (res.status === "success" && res.participant) {
-      playBeep();
-      setResult({
-        status: "success",
-        name: res.participant.name,
-        initials: res.participant.name.split(" ").map((n) => n[0]).join(""),
-      });
-    } else if (res.status === "already" && res.participant) {
-      setResult({
-        status: "already",
-        name: res.participant.name,
-        time: res.participant.checkInTime,
-      });
     }
     setShowManualSearch(false);
     setSearchQuery("");
@@ -127,11 +180,66 @@ export default function CheckinPage() {
         </Button>
       </div>
 
+      {publishedSubeventos.length > 0 && (
+        <div className="flex items-center justify-center p-3 border-b border-white/10 bg-white/5">
+          <div className="relative">
+            <button
+              data-testid="dropdown-checkin-target"
+              onClick={() => setShowDropdown(!showDropdown)}
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 hover:bg-white/15 transition-colors text-sm font-medium"
+            >
+              Check-in para: <span className="text-[#DEFF66] font-bold">{targetLabel}</span>
+              <ChevronDown size={16} className={`transition-transform ${showDropdown ? "rotate-180" : ""}`} />
+            </button>
+            {showDropdown && (
+              <div className="absolute top-full mt-1 left-0 right-0 bg-white rounded-xl shadow-xl overflow-hidden z-50 min-w-[240px]">
+                <button
+                  onClick={() => { setSelectedTarget("geral"); setShowDropdown(false); }}
+                  className={`w-full text-left px-4 py-3 text-sm hover:bg-gray-50 transition-colors ${
+                    selectedTarget === "geral" ? "bg-[#FBF7EB] text-[#314C5D] font-semibold" : "text-gray-700"
+                  }`}
+                >
+                  Evento geral
+                </button>
+                {publishedSubeventos.map((s) => (
+                  <button
+                    key={s.id}
+                    data-testid={`dropdown-target-${s.id}`}
+                    onClick={() => { setSelectedTarget(s.id); setShowDropdown(false); }}
+                    className={`w-full text-left px-4 py-3 text-sm hover:bg-gray-50 transition-colors flex items-center gap-3 ${
+                      selectedTarget === s.id ? "bg-[#FBF7EB] text-[#314C5D] font-semibold" : "text-gray-700"
+                    }`}
+                  >
+                    <div
+                      className="w-6 h-6 rounded flex items-center justify-center text-white text-[10px] font-bold shrink-0"
+                      style={{ backgroundColor: s.cor_primaria }}
+                    >
+                      {s.logo_inicial}
+                    </div>
+                    <span>{s.nome}</span>
+                    <span className={`ml-auto text-[10px] px-1.5 py-0.5 rounded font-medium ${
+                      s.modo_inscricao === "inscricao" ? "bg-[#314C5D] text-white" : "bg-[#FF6982] text-white"
+                    }`}>
+                      {s.modo_inscricao === "inscricao" ? "Pre-inscr." : "Livre"}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       <div className="flex-1 flex flex-col items-center justify-center p-6">
         <div className="text-center mb-8">
           <div className="text-7xl md:text-9xl font-heading font-bold text-[#DEFF66]">
-            {checkedIn}
-            <span className="text-3xl md:text-5xl text-white/50"> / {event.maxCapacity}</span>
+            {selectedTarget === "geral" ? checkedIn : selectedSubevento?.presentes_count ?? 0}
+            <span className="text-3xl md:text-5xl text-white/50">
+              {" / "}
+              {selectedTarget === "geral"
+                ? event.maxCapacity
+                : selectedSubevento?.capacidade ?? "---"}
+            </span>
           </div>
           <p className="text-white/60 text-lg mt-2">presentes</p>
         </div>
@@ -158,7 +266,7 @@ export default function CheckinPage() {
                 </div>
                 <div>
                   <p className="font-heading font-bold text-xl">{result.name}</p>
-                  <p className="text-white/80">Check-in confirmado!</p>
+                  <p className="text-white/80">{result.label}</p>
                 </div>
               </div>
             )}
@@ -169,7 +277,7 @@ export default function CheckinPage() {
                 </div>
                 <div>
                   <p className="font-heading font-bold text-xl">{result.name}</p>
-                  <p className="text-white/80">Já registrado às {result.time}</p>
+                  <p className="text-white/80">Ja registrado as {result.time}</p>
                 </div>
               </div>
             )}
@@ -179,8 +287,19 @@ export default function CheckinPage() {
                   ?
                 </div>
                 <div>
-                  <p className="font-heading font-bold text-xl">Participante não encontrado</p>
-                  <p className="text-white/80">Verifique o código e tente novamente</p>
+                  <p className="font-heading font-bold text-xl">Participante nao encontrado</p>
+                  <p className="text-white/80">Verifique o codigo e tente novamente</p>
+                </div>
+              </div>
+            )}
+            {result.status === "not_subscribed" && (
+              <div className="bg-[#FF8C69] rounded-2xl p-6 flex items-center gap-4">
+                <div className="w-14 h-14 rounded-full bg-white/20 flex items-center justify-center text-xl font-bold">
+                  !
+                </div>
+                <div>
+                  <p className="font-heading font-bold text-xl">{result.name}</p>
+                  <p className="text-white/80">Participante nao inscrito neste subevento</p>
                 </div>
               </div>
             )}
@@ -189,7 +308,7 @@ export default function CheckinPage() {
       </div>
 
       <div className="border-t border-white/10 p-4">
-        <p className="text-xs text-white/40 mb-3 font-medium uppercase tracking-wider">Últimos check-ins</p>
+        <p className="text-xs text-white/40 mb-3 font-medium uppercase tracking-wider">Ultimos check-ins</p>
         <div className="space-y-2 max-h-48 overflow-y-auto">
           {checkInLogs.slice(0, 10).map((log, i) => (
             <div key={i} className="flex items-center justify-between text-sm py-1.5 px-3 rounded-lg bg-white/5">
@@ -239,7 +358,7 @@ export default function CheckinPage() {
                   key={p.id}
                   data-testid={`manual-checkin-${p.id}`}
                   onClick={() => handleManualCheckIn(p.token)}
-                  disabled={p.checkIn}
+                  disabled={selectedTarget === "geral" && p.checkIn}
                   className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 disabled:opacity-50 transition-colors text-left"
                 >
                   <div className="flex items-center gap-3">
@@ -251,7 +370,7 @@ export default function CheckinPage() {
                       <p className="text-xs text-gray-500">{p.email}</p>
                     </div>
                   </div>
-                  {p.checkIn ? (
+                  {selectedTarget === "geral" && p.checkIn ? (
                     <span className="text-xs text-green-600 font-medium">Presente</span>
                   ) : (
                     <span className="text-xs text-[#314C5D] font-medium">Check-in</span>

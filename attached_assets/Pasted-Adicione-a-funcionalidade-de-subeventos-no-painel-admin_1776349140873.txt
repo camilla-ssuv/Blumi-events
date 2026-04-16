@@ -1,0 +1,96 @@
+Adicione a funcionalidade de subeventos no painel admin do evento. NÃO altere nenhuma tela existente além do painel do evento (/admin/eventos/[id]). Siga as instruções abaixo com precisão.
+
+========================================
+1. ATUALIZAR MOCK DATA
+========================================
+No arquivo /lib/mock-data.ts, garanta que o evento "Imersão em QuantDev na XP Inc." tenha:
+- tipo: 'feira' (campo novo no tipo Evento)
+- subeventos: array com os dados já definidos no Prompt 3 (não recriar, só confirmar que existem)
+
+========================================
+2. ABA "SUBEVENTOS" NO PAINEL DO EVENTO
+========================================
+No painel do evento (/admin/eventos/[id]), adicione uma nova aba "Subeventos" SOMENTE se evento.tipo === 'feira'.
+
+A aba deve aparecer entre as abas existentes, após "Participantes".
+
+Dentro da aba Subeventos:
+- Cabeçalho com título "Subeventos da feira" e botão "+ Adicionar subevento" (fundo #DEFF66, texto #314C5D, bold)
+- Tabela ou lista de cards com os subeventos mockados, mostrando:
+  * Nome do subevento
+  * Tipo (badge colorido: stand=#29D4FF, palestra=#DEFF66, workshop=#FF8C69)
+  * Modo (badge: "Pré-inscrição"=#314C5D ou "Check-in livre"=#FF6982)
+  * Vagas (número ou "Ilimitado")
+  * Inscritos (número mockado)
+  * Status (badge: publicado=verde, rascunho=cinza, encerrado=vermelho)
+  * Botões: "Ver detalhes" e "Editar"
+- Filtro por tipo no topo da lista (Todos | Stand | Palestra | Workshop)
+
+========================================
+3. MODAL DE CRIAR/EDITAR SUBEVENTO
+========================================
+Ao clicar em "+ Adicionar subevento" ou "Editar", abrir um modal (não nova página) com:
+
+CAMPOS DO FORMULÁRIO:
+- Nome* (input texto)
+- Tipo* (select: Stand | Palestra | Workshop | Outro)
+- Descrição (textarea)
+- Capacidade (número — vazio = ilimitado)
+- Data e hora de início (datetime-local input)
+- Data e hora de fim (datetime-local input)
+- Logo da empresa (input file — só visual, não precisa fazer upload real)
+- Cor primária (color picker input type="color", default #314C5D)
+
+MODO DE INSCRIÇÃO — seção destacada com fundo #F5F5F0:
+- Toggle/radio com duas opções:
+  OPÇÃO A "Pré-inscrição obrigatória": participante se inscreve no subevento, recebe QR próprio. Badge roxo.
+  OPÇÃO B "Check-in livre": qualquer inscrito no evento pai pode entrar. O beep rastreia a visita. Badge rosa.
+
+- Se Opção A selecionada: mostrar checkbox "Inscrição automática — inscrever automaticamente todos os inscritos no evento pai neste subevento"
+
+BOTÕES DO MODAL:
+- "Cancelar" (outline)
+- "Salvar como rascunho" (outline #314C5D)
+- "Publicar subevento" (fundo #DEFF66, texto #314C5D)
+
+Ao salvar: adicionar o subevento ao mock data em memória (useState) e fechar o modal.
+
+========================================
+4. TELA DE DETALHES DO SUBEVENTO
+========================================
+Ao clicar em "Ver detalhes", mostrar um painel lateral (drawer) ou seção expansível com:
+
+- Cards de métricas: Inscritos / Vagas restantes / Presentes / Taxa de presença
+  (valores mockados, cards com fundo #314C5D e número em #DEFF66)
+
+- Lista de participantes inscritos neste subevento (filtrada do mock data por subevento_id)
+  Colunas: Nome | E-mail | Status de presença (presente/ausente)
+
+- Botão "Exportar CSV" (só visual, não precisa funcionar de verdade)
+
+- Botão "Encerrar subevento" (vermelho, com modal de confirmação)
+
+========================================
+5. ATUALIZAR CHECK-IN PARA SUBEVENTOS
+========================================
+Na tela /admin/checkin/[id], adicionar:
+
+- Dropdown no topo: "Check-in para: [Evento geral ▼]"
+  Opções: Evento geral + cada subevento publicado
+
+- Quando subevento Modo A selecionado:
+  Beep valida se o QR pertence a uma inscrição neste subevento específico.
+  Se QR for do evento geral: card laranja "Participante não inscrito neste stand"
+
+- Quando subevento Modo B selecionado:
+  Beep aceita qualquer QR do evento pai.
+  Registra visita com nome do stand no histórico de check-ins.
+  Label diferente: "Visita registrada — Stand [nome]" em vez de "Check-in confirmado"
+
+========================================
+REGRAS VISUAIS
+========================================
+- Cores: #314C5D principal, #DEFF66 CTA, #FF6982 alertas, #FF8C69 warnings, #FBF7EB fundo
+- Tipografia: Plus Jakarta Sans títulos, Inter corpo
+- Cantos: 16px cards, 8px botões
+- NÃO alterar nenhuma tela além das mencionadas acima

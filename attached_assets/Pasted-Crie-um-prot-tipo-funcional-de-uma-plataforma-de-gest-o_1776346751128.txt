@@ -1,0 +1,112 @@
+Crie um protótipo funcional de uma plataforma de gestão de eventos chamada Blūmi Events. Use Next.js 14 com App Router e Tailwind CSS. Não precisa de banco de dados real — use estado local (useState) e dados mockados em /lib/mock-data.ts.
+
+========================================
+IDENTIDADE VISUAL OBRIGATÓRIA
+========================================
+Cores (use como variáveis CSS e classes Tailwind customizadas):
+- Principal: #314C5D (azul-petróleo — header, sidebar, cards de destaque)
+- Acento primário: #DEFF66 (verde-limão — botões CTA principais, badges, destaques)
+- Acento rosa: #FF6982 (botões secundários, alertas, métricas de destaque)
+- Acento azul-claro: #29D4FF (informações, links ativos)
+- Acento laranja: #FF8C69 (warnings, categorias)
+- Fundo: #FBF7EB (off-white quente — NUNCA use branco puro #FFFFFF)
+- Texto principal: #000000
+- Texto claro: #314C5D
+
+Tipografia (importe do Google Fonts):
+- Display/títulos: Plus Jakarta Sans (weights 600, 700, 800)
+- Corpo/interface: Inter (weights 400, 500, 600)
+
+Tom visual: moderno, vibrante, confiante. Cards com cantos arredondados (16px). Botões CTA com fundo #DEFF66 e texto #314C5D em bold. Header sempre com fundo #314C5D e logo/texto em branco. Sidebar do admin em #314C5D com itens ativos em #DEFF66.
+
+========================================
+FLUXO 1 — ADMIN CRIA EVENTO
+========================================
+Tela: /admin/eventos/novo
+- Sidebar esquerda com fundo #314C5D, logo "blūmi events" em branco, itens de menu com ícones
+- Formulário com: nome do evento, descrição, data e hora de início, data e hora de fim, local (nome + endereço), capacidade máxima, tipo ('simples' | 'feira com stands')
+- Botão "Salvar rascunho" (outline, cor #314C5D) e "Publicar evento" (fundo #DEFF66, texto #314C5D, bold)
+- Ao publicar → redireciona para /admin/eventos/[id]
+
+Tela: /admin/eventos/[id]
+- Header da página com nome do evento e badge de status (rascunho=cinza, publicado=#DEFF66, encerrado=#FF6982)
+- 4 cards de métricas: "Inscritos" / "Vagas restantes" / "Check-ins" / "Taxa de presença" — cards com fundo #314C5D e números grandes em #DEFF66
+- Abas: Participantes | Perguntas de triagem | Check-in ao vivo
+
+========================================
+FLUXO 2 — TRIAGEM
+========================================
+Na aba "Perguntas de triagem":
+- Lista de perguntas mockadas (ex: "Qual sua área?" e "Como ficou sabendo?")
+- Botão "+ Adicionar pergunta" com fundo #DEFF66
+- Modal para criar: enunciado, tipo (texto livre | seleção única | múltipla escolha), opções, obrigatória (toggle)
+- Drag handle visual (ícone de 6 pontos) para reordenar — visual apenas
+- Botões editar (ícone lápis) e excluir (ícone lixeira) por pergunta
+
+========================================
+FLUXO 3 — INSCRIÇÃO DO PARTICIPANTE
+========================================
+Tela: /eventos/[slug]
+- Header com fundo #314C5D, nome do evento em branco, data e local
+- Capa do evento: bloco colorido com gradiente entre #314C5D e #29D4FF
+- Seção de descrição com fundo #FBF7EB
+- Botão "Quero me inscrever" grande, fundo #DEFF66, texto #314C5D bold
+- Modal de inscrição em 2 etapas com indicador de progresso:
+  Etapa 1: Nome completo, e-mail, senha, tipo de ingresso (radio buttons)
+  Etapa 2: Perguntas de triagem mockadas
+- Tela de sucesso: card com fundo #314C5D, texto em branco, ícone de check em #DEFF66, mensagem "Inscrição confirmada! Seu QR code foi enviado para o seu e-mail."
+
+========================================
+FLUXO 4 — ÁREA DO PARTICIPANTE
+========================================
+Tela: /minha-area
+- Header com fundo #314C5D, nome do participante e avatar com iniciais em #DEFF66
+- Aba "Meus eventos": card do evento com fundo branco, borda #314C5D, nome, data, local e QR code (gere visualmente com padrão de quadrados preto e branco em SVG — não precisa ser QR real)
+- Aba "Eventos passados": mesmo card mas com opacidade reduzida (grayscale) e botão "Baixar certificado" (outline #314C5D)
+
+========================================
+FLUXO 5 — CHECK-IN POR BEEP/USB
+========================================
+Tela: /admin/checkin/[id]
+- Fundo escuro (#314C5D) para modo de operação — diferente do resto do admin
+- Campo de input grande, centralizado, sempre em foco, com placeholder "Aguardando leitura do QR code..."
+- Ao apertar Enter com qualquer texto:
+  → Encontrado e não checado: card verde com nome, iniciais em avatar, "Check-in confirmado!" + beep curto (Web Audio API: oscillator 880hz por 100ms)
+  → Já registrado: card #FF6982 "Já registrado às 14h32"
+  → Não encontrado: card laranja #FF8C69 "Participante não encontrado"
+- Contador grande: "347 / 2.000" com label "presentes" — número em #DEFF66
+- Lista dos últimos 10 check-ins com nome, hora e origem
+- Botão "Busca manual" que abre campo de texto com lista de participantes filtrada em tempo real
+
+========================================
+DADOS MOCKADOS (/lib/mock-data.ts)
+========================================
+Evento: "Imersão em QuantDev na XP Inc." — 15/05/2025, 9h–18h, Av. Brigadeiro Faria Lima, 3500, São Paulo — 500 vagas — publicado
+
+Participantes (8 total, 3 já com check-in):
+1. Ana Costa — ana@email.com — token: "QR-001" — check-in: sim (09h12)
+2. Bruno Lima — bruno@email.com — token: "QR-002" — check-in: sim (09h18)
+3. Carla Souza — carla@email.com — token: "QR-003" — check-in: sim (09h31)
+4. Diego Alves — diego@email.com — token: "QR-004" — check-in: não
+5. Elena Rocha — elena@email.com — token: "QR-005" — check-in: não
+6. Felipe Dias — felipe@email.com — token: "QR-006" — check-in: não
+7. Gabriela Nunes — gabriela@email.com — token: "QR-007" — check-in: não
+8. Henrique Mota — henrique@email.com — token: "QR-008" — check-in: não
+
+Perguntas de triagem mockadas:
+1. "Qual é a sua área de atuação?" — seleção única — obrigatória
+   Opções: Tecnologia | Finanças | Marketing | Outro
+2. "Como ficou sabendo do evento?" — seleção única — opcional
+   Opções: LinkedIn | Instagram | Indicação | E-mail
+
+========================================
+REQUISITOS TÉCNICOS
+========================================
+- Next.js 14, App Router, TypeScript
+- Tailwind CSS com cores customizadas no tailwind.config.ts
+- Google Fonts: Inter + Plus Jakarta Sans via next/font
+- Componentes em /components organizados por domínio (admin/, participant/, checkin/)
+- Mock data em /lib/mock-data.ts — separado de toda lógica de UI
+- Simular auth com contexto simples: botão "Entrar como Admin" e "Entrar como Participante" na home
+- Responsivo — sidebar colapsável no mobile com hamburger menu
+- Sem autenticação real, sem banco, sem envio de e-mail

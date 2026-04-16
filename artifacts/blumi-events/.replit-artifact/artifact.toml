@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "Blūmi Events"
+version = "1.0.0"
+id = "artifacts/blumi-events"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 21919
+
+[services.development]
+run = "pnpm --filter @workspace/blumi-events run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/blumi-events", "run", "build" ]
+publicDir = "artifacts/blumi-events/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "21919"
+BASE_PATH = "/"

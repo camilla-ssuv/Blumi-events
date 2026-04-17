@@ -84,7 +84,7 @@
   --blumi-pink: 350 100% 71%; /* #FF6982 */
   --blumi-blue: 192 100% 58%; /* #29D4FF */
   --blumi-orange: 14 100% 71%; /* #FF8C69 */
-  --blumi-bg: 45 61% 95%; /* #FBF7EB */
+  --blumi-bg: 220 20% 97%; /* #F5F6F8 — light cool gray (was warm cream #FBF7EB) */
 
   --background: var(--blumi-bg);
   --foreground: 0 0% 0%; /* Main text */

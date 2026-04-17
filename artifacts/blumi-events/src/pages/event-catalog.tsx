@@ -157,7 +157,7 @@ export default function EventCatalog() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FBF7EB]">
+    <div className="min-h-screen bg-[#F5F6F8]">
       <Navbar />
 
       <div className="bg-[#314C5D] px-6 pt-12 pb-14">
@@ -184,7 +184,7 @@ export default function EventCatalog() {
         </div>
       </div>
 
-      <div className="bg-[#FBF7EB] border-b border-gray-200 px-6 py-4">
+      <div className="bg-white border-b border-gray-200 px-6 py-4">
         <div className="max-w-5xl mx-auto flex flex-wrap items-center gap-4">
           <div className="flex gap-2 flex-wrap">
             {(["todos", "feira", "palestra", "workshop"] as TipoFilter[]).map((t) => (

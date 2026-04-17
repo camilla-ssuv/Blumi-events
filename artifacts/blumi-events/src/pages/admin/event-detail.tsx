@@ -9,7 +9,7 @@ import { ParticipantsTab } from "@/components/admin/participants-tab";
 import { QuestionsTab } from "@/components/admin/questions-tab";
 import { CheckinTab } from "@/components/admin/checkin-tab";
 import { SubeventosTab } from "@/components/admin/subeventos-tab";
-import { QrCode } from "lucide-react";
+import { QrCode, Users, Ticket, CheckCircle2, TrendingUp } from "lucide-react";
 
 export default function EventDetail() {
   const { event, participants } = useEventStore();
@@ -60,10 +60,38 @@ export default function EventDetail() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <MetricCard label="Inscritos" value={totalRegistered} data-testid="metric-registered" />
-        <MetricCard label="Vagas restantes" value={spotsRemaining} data-testid="metric-spots" />
-        <MetricCard label="Check-ins" value={checkedIn} data-testid="metric-checkins" />
-        <MetricCard label="Taxa de presença" value={`${attendanceRate}%`} data-testid="metric-rate" />
+        <MetricCard
+          label="Inscritos"
+          value={totalRegistered}
+          accent="#314C5D"
+          icon={<Users size={16} />}
+          context={`de ${event.maxCapacity} vagas`}
+          data-testid="metric-registered"
+        />
+        <MetricCard
+          label="Vagas restantes"
+          value={spotsRemaining}
+          accent="#29D4FF"
+          icon={<Ticket size={16} />}
+          context={`${Math.round((spotsRemaining / event.maxCapacity) * 100)}% disponível`}
+          data-testid="metric-spots"
+        />
+        <MetricCard
+          label="Check-ins"
+          value={checkedIn}
+          accent="#DEFF66"
+          icon={<CheckCircle2 size={16} />}
+          context={`de ${totalRegistered} inscritos`}
+          data-testid="metric-checkins"
+        />
+        <MetricCard
+          label="Taxa de presença"
+          value={`${attendanceRate}%`}
+          accent="#FF6982"
+          icon={<TrendingUp size={16} />}
+          context="presentes / inscritos"
+          data-testid="metric-rate"
+        />
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
@@ -119,14 +147,49 @@ export default function EventDetail() {
   );
 }
 
-function MetricCard({ label, value, ...props }: { label: string; value: string | number; "data-testid"?: string }) {
+function MetricCard({
+  label,
+  value,
+  accent,
+  icon,
+  context,
+  ...props
+}: {
+  label: string;
+  value: string | number;
+  accent: string;
+  icon: React.ReactNode;
+  context: string;
+  "data-testid"?: string;
+}) {
   return (
     <div
-      className="bg-[#314C5D] rounded-2xl p-6 flex flex-col justify-between"
+      className="bg-white rounded-2xl border border-gray-200 p-5 flex flex-col gap-4 hover:shadow-sm transition-shadow"
       data-testid={props["data-testid"]}
     >
-      <p className="text-white/70 text-sm font-medium mb-2">{label}</p>
-      <p className="text-[#DEFF66] text-4xl font-heading font-bold">{value}</p>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <span
+            className="w-2 h-2 rounded-full shrink-0"
+            style={{ backgroundColor: accent }}
+            aria-hidden
+          />
+          <p className="text-sm font-medium text-gray-600">{label}</p>
+        </div>
+        <div
+          className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
+          style={{ backgroundColor: `${accent}1A`, color: accent }}
+          aria-hidden
+        >
+          {icon}
+        </div>
+      </div>
+      <div className="flex items-baseline gap-2">
+        <p className="text-[#314C5D] text-4xl font-heading font-bold leading-none">
+          {value}
+        </p>
+      </div>
+      <p className="text-xs text-gray-500 -mt-1">{context}</p>
     </div>
   );
 }

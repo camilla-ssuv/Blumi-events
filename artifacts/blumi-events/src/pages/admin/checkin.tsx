@@ -196,7 +196,7 @@ export default function CheckinPage() {
                 <button
                   onClick={() => { setSelectedTarget("geral"); setShowDropdown(false); }}
                   className={`w-full text-left px-4 py-3 text-sm hover:bg-gray-50 transition-colors ${
-                    selectedTarget === "geral" ? "bg-[#FBF7EB] text-[#314C5D] font-semibold" : "text-gray-700"
+                    selectedTarget === "geral" ? "bg-[#F5F6F8] text-[#314C5D] font-semibold" : "text-gray-700"
                   }`}
                 >
                   Evento geral
@@ -207,7 +207,7 @@ export default function CheckinPage() {
                     data-testid={`dropdown-target-${s.id}`}
                     onClick={() => { setSelectedTarget(s.id); setShowDropdown(false); }}
                     className={`w-full text-left px-4 py-3 text-sm hover:bg-gray-50 transition-colors flex items-center gap-3 ${
-                      selectedTarget === s.id ? "bg-[#FBF7EB] text-[#314C5D] font-semibold" : "text-gray-700"
+                      selectedTarget === s.id ? "bg-[#F5F6F8] text-[#314C5D] font-semibold" : "text-gray-700"
                     }`}
                   >
                     <div

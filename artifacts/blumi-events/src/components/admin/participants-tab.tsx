@@ -87,7 +87,7 @@ export function ParticipantsTab() {
             </thead>
             <tbody>
               {filtered.map((p) => (
-                <tr key={p.id} className="border-b border-gray-50 hover:bg-[#FBF7EB]/50 transition-colors" data-testid={`row-participant-${p.id}`}>
+                <tr key={p.id} className="border-b border-gray-50 hover:bg-[#F5F6F8]/70 transition-colors" data-testid={`row-participant-${p.id}`}>
                   <td className="p-4">
                     <div className="flex items-center gap-3">
                       <div className="w-9 h-9 rounded-full bg-[#314C5D] text-white flex items-center justify-center text-sm font-semibold">

@@ -37,7 +37,7 @@ export default function SubeventPublic() {
 
   if (!subevento) {
     return (
-      <div className="min-h-screen bg-[#FBF7EB] flex items-center justify-center">
+      <div className="min-h-screen bg-[#F5F6F8] flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-heading font-bold text-[#314C5D] mb-4">Subevento não encontrado</h1>
           <Button onClick={() => setLocation(`/eventos/${event.slug}`)} className="bg-[#DEFF66] text-[#314C5D] font-bold rounded-xl">
@@ -69,7 +69,7 @@ export default function SubeventPublic() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FBF7EB]">
+    <div className="min-h-screen bg-[#F5F6F8]">
       <Navbar />
       <header className="text-white py-8 px-6 relative" style={{ backgroundColor: subevento.cor_primaria || "#314C5D" }}>
         <div className="max-w-3xl mx-auto">

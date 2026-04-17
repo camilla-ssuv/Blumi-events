@@ -141,7 +141,7 @@ export default function EventPublic() {
     : "linear-gradient(135deg, #314C5D 0%, #29D4FF 100%)";
 
   return (
-    <div className="min-h-screen bg-[#FBF7EB]">
+    <div className="min-h-screen bg-[#F5F6F8]">
       <Navbar />
       <header className="bg-[#314C5D] text-white py-6 px-6">
         <div className="max-w-4xl mx-auto">
@@ -577,7 +577,7 @@ export default function EventPublic() {
               )}
               {subStep === 2 && (
                 <>
-                  <div className="bg-[#FBF7EB] rounded-xl p-4 space-y-2">
+                  <div className="bg-[#F5F6F8] rounded-xl p-4 space-y-2">
                     <p className="font-heading font-bold text-[#314C5D]">{subModal.nome}</p>
                     <p className="text-sm text-gray-600">{subModal.descricao}</p>
                     <p className="text-xs text-gray-500">

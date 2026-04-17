@@ -26,7 +26,7 @@ Frontend-only event management platform prototype at `/`. Built with React + Vit
 - Pink accent: #FF6982
 - Light blue: #29D4FF
 - Orange: #FF8C69
-- Background: #FBF7EB (warm off-white)
+- Background: #F5F6F8 (light cool gray — NOT the warm cream #FBF7EB)
 - Fonts: Plus Jakarta Sans (headings), Inter (body)
 
 ### Features

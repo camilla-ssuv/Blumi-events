@@ -1,0 +1,74 @@
+Implemente a funcionalidade de check-in de participante em stand via QR Code.
+
+## Contexto
+Cada stand é associado a um evento. A combinação stand + evento gera um QR code único. 
+O participante escaneia o QR code com o celular, faz login se necessário, e registra 
+sua visita. O mesmo participante não pode registrar visita duplicada no mesmo stand/evento.
+
+## O que construir
+
+### 1. Backend
+
+**Nova rota de geração de QR code**
+- `GET /api/eventos/:eventId/stands/:standId/qrcode`
+- Restrito a admins do evento
+- Retorna imagem PNG do QR code encodando a URL:
+  `/eventos/:eventId/stands/:standId/checkin`
+- Também envia o QR code por e-mail para o e-mail cadastrado do stand se 
+  o parâmetro `?email=true` for passado
+
+**Nova rota de check-in**
+- `POST /api/eventos/:eventId/stands/:standId/checkin`
+- Requer autenticação (participante logado)
+- Valida que o participante tem inscrição confirmada neste evento
+- Insere registro em `stand_checkins` (participante_id, stand_id, evento_id, checked_in_at)
+- Se já existe registro para essa combinação, ignora silenciosamente (retorna 200 OK)
+- Retorna: nome da empresa, logo da empresa, mensagem de confirmação
+
+**Nova view derivada para tags do participante**
+- Não criar tabela separada
+- Criar uma query/view que agrupa `stand_checkins` por (participante_id, evento_id) 
+  e retorna os stands visitados com nome e logo da empresa parceira
+- Expor via `GET /api/participantes/:participanteId/tags?eventoId=:eventoId`
+
+### 2. Migrations
+
+Criar tabela `stand_checkins`:
+- id (PK)
+- participante_id (FK → users)
+- stand_id (FK → stands)
+- evento_id (FK → eventos)
+- checked_in_at (timestamp)
+- Unique constraint em (participante_id, stand_id, evento_id)
+
+### 3. Frontend — Página de check-in (mobile-first)
+
+Rota: `/eventos/:eventId/stands/:standId/checkin`
+- Se não logado: redireciona para login e volta para esta URL após autenticação
+- Se logado mas não inscrito: exibe mensagem "Você não está inscrito neste evento"
+- Se logado e inscrito: chama o POST de check-in e exibe tela de confirmação com 
+  nome da empresa, logo e mensagem "Presença registrada!"
+- Se já fez check-in antes: exibe a mesma tela de confirmação (não mostrar erro)
+
+### 4. Frontend — Painel do admin
+
+Na tela de gestão do evento, na seção de stands:
+- Botão "Baixar QR Code" (download da imagem PNG) por stand
+- Botão "Enviar por e-mail" por stand
+- Contador de visitas por stand em tempo real
+
+### 5. Frontend — Painel da empresa parceira
+
+Na tela da empresa, adicionar aba ou seção "Visitas ao Stand":
+- Lista de participantes que fizeram check-in (nome, e-mail conforme nível de acesso)
+- Total de visitas
+
+### 6. Frontend — Perfil do participante
+
+Adicionar seção "Empresas visitadas" com as tags (logo + nome da empresa) 
+agrupadas por evento, derivadas da view de stand_checkins.
+
+## Restrições
+- Não criar entidade/tabela separada para tags — derivar sempre de stand_checkins
+- O QR code não usa token de uso único — a proteção é feita na camada de autenticação
+- Seguir os padrões de código, nomenclatura e estrutura já existentes no projeto

@@ -1,0 +1,1 @@
+self.__REACT_LOADABLE_MANIFEST='{"components\\\\minha-area\\\\qr-code.tsx -> qrcode":{"id":4181,"files":["static/chunks/181.8f6e51a7f9d6695d.js"]}}';

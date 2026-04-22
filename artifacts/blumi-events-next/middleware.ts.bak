@@ -1,0 +1,73 @@
+import { NextRequest, NextResponse } from 'next/server'
+
+const MODULE_ROUTES: Record<string, string> = {
+  '/eventos': 'eventos',
+  '/pesquisas': 'pesquisas',
+  '/vagas': 'vagas',
+}
+
+const ADMIN_ROUTES = ['/admin']
+const SUPER_ADMIN_ROUTES = ['/super-admin']
+const PUBLIC_ROUTES = ['/', '/sem-acesso', '/login', '/certificado', '/expositor', '/dev-login', '/offline', '/api/mock']
+
+export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl
+
+  // Rotas públicas — sem verificação
+  if (PUBLIC_ROUTES.some((r) => pathname === r || pathname.startsWith(r + '/'))) {
+    return NextResponse.next()
+  }
+
+  const raw = request.cookies.get('blumi_session')?.value
+
+  if (!raw) {
+    return NextResponse.redirect(new URL('/login', request.url))
+  }
+
+  try {
+    const session = JSON.parse(decodeURIComponent(raw))
+
+    if (session.expires_at < Date.now() / 1000) {
+      return NextResponse.redirect(new URL('/login', request.url))
+    }
+
+    const modulos: string[] = session.user?.modulos_ativos ?? []
+    const role: string = session.user?.role ?? ''
+
+    // /super-admin — exige role super_admin
+    if (SUPER_ADMIN_ROUTES.some((r) => pathname.startsWith(r))) {
+      if (role !== 'super_admin') {
+        return NextResponse.redirect(new URL('/sem-acesso', request.url))
+      }
+    }
+
+    // Rotas admin — exige role de gestão
+    if (ADMIN_ROUTES.some((r) => pathname.startsWith(r))) {
+      if (!['super_admin', 'company_admin', 'operator'].includes(role)) {
+        return NextResponse.redirect(new URL('/sem-acesso', request.url))
+      }
+    }
+
+    // Rotas de módulo — só aplica para usuários corporativos (não participantes)
+    const isParticipant = role === 'participant'
+    if (!isParticipant) {
+      const requiredModule = Object.entries(MODULE_ROUTES).find(([r]) =>
+        pathname.startsWith(r)
+      )?.[1]
+
+      if (requiredModule && !modulos.includes(requiredModule)) {
+        return NextResponse.redirect(new URL('/sem-acesso', request.url))
+      }
+    }
+
+    return NextResponse.next()
+  } catch {
+    return NextResponse.redirect(new URL('/login', request.url))
+  }
+}
+
+export const config = {
+  matcher: [
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+  ],
+}

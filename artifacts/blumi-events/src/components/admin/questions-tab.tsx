@@ -130,7 +130,7 @@ function QuestionModal({
 
   const handleSubmit = () => {
     const cleanOptions = type !== "texto livre" ? options.filter((o) => o.trim()) : undefined;
-    onSave({ statement, type, required, options: cleanOptions, id: question?.id || "" });
+    onSave({ statement, type, required, options: cleanOptions });
   };
 
   return (

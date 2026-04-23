@@ -1,0 +1,4 @@
+node_modules
+.next
+artifacts/blumi-events-next/node_modules
+artifacts/blumi-events-next/.next

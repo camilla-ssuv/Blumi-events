@@ -1,1 +1,0 @@
-{"version":2,"builds":[{"src":"artifacts/blumi-events-next/package.json","use":"@vercel/next"}],"routes":[{"src":"(.*)","dest":"artifacts/blumi-events-next/$1"}]}
